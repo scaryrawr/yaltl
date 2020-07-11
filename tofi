@@ -1,0 +1,12 @@
+#!/bin/env sh
+
+SCRIPT=`readlink -f "$0"`
+SCRIPT_DIR=`dirname "$SCRIPT"`
+TOFI="$SCRIPT_DIR/tofib"
+
+$TOFI --applications | sort -u -r | \
+	fzf --bind "ctrl-w:reload(python '$TOFI' --windows | sort -u -r)" \
+		--bind "ctrl-a:reload(python '$TOFI' --applications | sort -u -r)" \
+		--preview "echo '{}' | '$TOFI' --preview" \
+		--preview-window ":0" | \
+	$TOFI
