@@ -24,7 +24,7 @@ def list_apps():
     print(*map(create_app_search_result, filter(lambda app : app.should_show(), Gio.AppInfo.get_all())), sep='\n')
 
 def list_windows():
-    print(*map(create_window_search_result, filter(lambda item: item.type == 'con' and item.window != None and item.window_instance != 'polybar' and item.window_instance != 'tofi' and item.app_id != 'tofi' and item.name != None, ipc.get_tree())), sep='\n')
+    print(*map(create_window_search_result, filter(lambda item: item.type == 'con' and item.window_instance != 'polybar' and item.window_instance != 'tofi' and item.app_id != 'tofi' and item.name != None, ipc.get_tree())), sep='\n')
 
 def focus_app(search_term, preview):
     tree = ipc.get_tree()
