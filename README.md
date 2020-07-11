@@ -2,6 +2,13 @@
 
 tofi is a terminal launcher for i3/sway using [fzf](https://github.com/junegunn/fzf)
 
+Why tofi? A play on [toffee](https://en.wikipedia.org/wiki/Toffee), and because there's:
+
+- [rofi](https://github.com/davatorium/rofi)
+- [wofi](https://hg.sr.ht/~scoopta/wofi)
+
+And it's based on using the terminal for UI (so a play on toffee).
+
 ## Dependencies
 
 - [i3ipc](https://github.com/altdesktop/i3ipc-python)
