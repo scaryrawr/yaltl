@@ -18,6 +18,10 @@ class Mode:
         """List items to stdout"""
         pass
 
+    def get_prefix(self):
+        """Get the prefix for the mode"""
+        return ''
+
     def launch(self, search):
         """Launch the item that matches the search"""
         pass
@@ -28,49 +32,80 @@ class Mode:
 
 class Apps(Mode):
     def __init__(self):
-        self.apps = filter(lambda app : app.should_show(), Gio.AppInfo.get_all())
+        self.prefix = 'launch'
+        self.apps = None
+
+    def load(self):
+        if not self.apps:
+            self.apps = filter(lambda app : app.should_show(), Gio.AppInfo.get_all())
+
+    def get_prefix(self):
+        return self.prefix
 
     def create_app_search_result(self, app):
-        return 'launch: {}: {}'.format(app.get_display_name(), app.get_description()) if app.get_description() != None else 'launch: {}'.format(app.get_name())
+        return '{}: {}: {}'.format(self.prefix, app.get_display_name(), app.get_description()) if app.get_description() != None else 'launch: {}'.format(app.get_name())
 
     def list(self):
+        self.load()
         print(*map(self.create_app_search_result, self.apps), sep='\n')
 
     def launch(self, search):
+        self.load()
         for binary in map(lambda app: app.get_executable() if app.get_executable() != '/usr/bin/flatpak' else app.get_commandline(), filter(lambda app: self.create_app_search_result(app) == search, self.apps)):
             ipc.command('exec --no-startup-id {}'.format(binary))
 
 class RecentFiles(Mode):
     def __init__(self):
-        self.files = filter(lambda file: file.exists(), Gtk.RecentManager.get_default().get_items())
+        self.prefix = 'recent'
+        self.files = None
+
+    def load(self):
+        if not self.files:
+            self.files = filter(lambda file: file.exists(), Gtk.RecentManager.get_default().get_items())
+
+    def get_prefix(self):
+        return self.prefix
 
     def create_recent_file_result(self, file):
-        return 'file: {} - {}'.format(file.get_display_name(), file.get_uri())
+        return '{}: {} - {}'.format(self.prefix, file.get_display_name(), file.get_uri())
 
     def list(self):
+        self.load()
         print(*map(self.create_recent_file_result, self.files), sep='\n')
 
     def launch(self, search):
+        self.load()
         for file in filter(lambda file: self.create_recent_file_result(file) == search, self.files):
             ipc.command('exec --no-startup-id xdg-open {}'.format(file.get_uri()))
 
 
 class Windows(Mode):
     def __init__(self):
-        self.tree = ipc.get_tree()
+        self.prefix = 'window'
+        self.tree = None
+
+    def load(self):
+        if not self.tree:
+            self.tree = ipc.get_tree()
+
+    def get_prefix(self):
+        return self.prefix
 
     def create_window_search_result(self, win):
-        return 'window: {} - {}'.format(win.name, win.id)
+        return '{}: {} - {}'.format(self.prefix, win.name, win.id)
 
     def list(self):
+        self.load()
         print(*map(self.create_window_search_result, filter(lambda item: item.type == 'con' and item.window_instance != 'polybar' and item.workspace() != None and item.window_instance != 'tofi' and item.app_id != 'tofi' and item.name != None, self.tree)), sep='\n')
 
     def launch(self, search):
+        self.load()
         for window in filter(lambda item: self.create_window_search_result(item) == search, self.tree):
             window.command('focus')
 
     def preview(self, search):
-        workspace = ''
+        self.load()
+        workspace = None 
         for window in filter(lambda item: self.create_window_search_result(item) == search, self.tree):
             workspace = window.workspace().name
             window.command('focus')
@@ -102,14 +137,13 @@ if __name__ == '__main__':
     if args.windows:
         window_switcher.list()
 
-    previews = [window_switcher]
-    launches = [app_launcher, recent_files, window_switcher]
+    modes = [app_launcher, recent_files, window_switcher]
 
     if not sys.stdin.isatty():
-        for line in sys.stdin:
+        for line in map(lambda item: item.strip(), sys.stdin):
             if args.preview:
-                for preview in previews:
-                    preview.preview(line.strip())
+                for mode in filter(lambda mode: line.startswith(mode.get_prefix()), modes):
+                    mode.preview(line.strip())
             else:
-                for launcher in launches:
-                    launcher.launch(line.strip())
+                for mode in filter(lambda mode: line.startswith(mode.get_prefix()), modes):
+                    mode.launch(line.strip())
