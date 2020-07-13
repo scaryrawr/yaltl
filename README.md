@@ -23,7 +23,9 @@ And it's based on using the terminal for UI (so a play on toffee).
 ## Modes
 
 - ctrl+a - Application Launcher (default)
+- ctrl+r - Recent files
 - ctrl+w - Active Window Select
+- ctrl+e - Everything
 
 ## Configuring i3/Sway
 
