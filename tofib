@@ -8,51 +8,108 @@ import gi
 gi.require_version('Gio', '2.0')
 from gi.repository import Gio
 
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
+
 ipc = i3ipc.Connection()
 
-def create_app_search_result(app):
-    return 'launch: {}: {}'.format(app.get_display_name(), app.get_description()) if app.get_description() != None else 'launch: {}'.format(app.get_name())
+class Mode:
+    def list(self):
+        """List items to stdout"""
+        pass
 
-def create_window_search_result(win):
-    return 'window: {} - {}'.format(win.name, win.id)
+    def launch(self, search):
+        """Launch the item that matches the search"""
+        pass
 
-def get_executable(search_term):
-    for binary in map(lambda app: app.get_executable() if app.get_executable() != '/usr/bin/flatpak' else app.get_commandline(), filter(lambda app: create_app_search_result(app).strip() == search_term, Gio.AppInfo.get_all())):
-        ipc.command('exec --no-startup-id {}'.format(binary))
+    def preview(self, search):
+        """Preview action for the search"""
+        pass
 
-def list_apps():
-    print(*map(create_app_search_result, filter(lambda app : app.should_show(), Gio.AppInfo.get_all())), sep='\n')
+class Apps(Mode):
+    def __init__(self):
+        self.apps = filter(lambda app : app.should_show(), Gio.AppInfo.get_all())
 
-def list_windows():
-    print(*map(create_window_search_result, filter(lambda item: item.type == 'con' and item.window_instance != 'polybar' and item.workspace() != None and item.window_instance != 'tofi' and item.app_id != 'tofi' and item.name != None, ipc.get_tree())), sep='\n')
+    def create_app_search_result(self, app):
+        return 'launch: {}: {}'.format(app.get_display_name(), app.get_description()) if app.get_description() != None else 'launch: {}'.format(app.get_name())
 
-def focus_app(search_term, preview):
-    tree = ipc.get_tree()
-    for window in filter(lambda item: create_window_search_result(item) == search_term, tree):
-        window.command('focus')
-    if preview:
-        for window in filter(lambda item: item.window_instance == 'tofi' or item.app_id == 'tofi', tree):
+    def list(self):
+        print(*map(self.create_app_search_result, self.apps), sep='\n')
+
+    def launch(self, search):
+        for binary in map(lambda app: app.get_executable() if app.get_executable() != '/usr/bin/flatpak' else app.get_commandline(), filter(lambda app: self.create_app_search_result(app) == search, self.apps)):
+            ipc.command('exec --no-startup-id {}'.format(binary))
+
+class RecentFiles(Mode):
+    def __init__(self):
+        self.files = filter(lambda file: file.exists(), Gtk.RecentManager.get_default().get_items())
+
+    def create_recent_file_result(self, file):
+        return 'file: {} - {}'.format(file.get_display_name(), file.get_uri())
+
+    def list(self):
+        print(*map(self.create_recent_file_result, self.files), sep='\n')
+
+    def launch(self, search):
+        for file in filter(lambda file: self.create_recent_file_result(file) == search, self.files):
+            ipc.command('exec --no-startup-id xdg-open {}'.format(file.get_uri()))
+
+
+class Windows(Mode):
+    def __init__(self):
+        self.tree = ipc.get_tree()
+
+    def create_window_search_result(self, win):
+        return 'window: {} - {}'.format(win.name, win.id)
+
+    def list(self):
+        print(*map(self.create_window_search_result, filter(lambda item: item.type == 'con' and item.window_instance != 'polybar' and item.workspace() != None and item.window_instance != 'tofi' and item.app_id != 'tofi' and item.name != None, self.tree)), sep='\n')
+
+    def launch(self, search):
+        for window in filter(lambda item: self.create_window_search_result(item) == search, self.tree):
             window.command('focus')
 
+    def preview(self, search):
+        workspace = ''
+        for window in filter(lambda item: self.create_window_search_result(item) == search, self.tree):
+            workspace = window.workspace().name
+            window.command('focus')
+        if workspace:
+            for window in filter(lambda item: item.window_instance == 'tofi' or item.app_id == 'tofi', self.tree):
+                window.command('move container to workspace {}'.format(workspace))
+                window.command('focus')
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Tofi Launcher')
+    parser = argparse.ArgumentParser(description='tofi launcher')
 
     parser.add_argument('--applications', help='List registered applications', action='store_true')
+    parser.add_argument('--recent', help='List recently used files', action='store_true')
     parser.add_argument('--windows', help='List active windows', action='store_true')
     parser.add_argument('--preview', help='Perform preview actions', action='store_true')
 
     args = parser.parse_args()
 
+    app_launcher = Apps()
+    recent_files = RecentFiles()
+    window_switcher = Windows()
+
     if args.applications:
-        list_apps()
+        app_launcher.list()
+
+    if args.recent:
+        recent_files.list()
+
     if args.windows:
-        list_windows()
+        window_switcher.list()
+
+    previews = [window_switcher]
+    launches = [app_launcher, recent_files, window_switcher]
 
     if not sys.stdin.isatty():
         for line in sys.stdin:
             if args.preview:
-                focus_app(line.strip(), True)
+                for preview in previews:
+                    preview.preview(line.strip())
             else:
-                get_executable(line.strip())
-                focus_app(line.strip(), False)
+                for launcher in launches:
+                    launcher.launch(line.strip())
