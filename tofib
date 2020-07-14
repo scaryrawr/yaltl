@@ -37,7 +37,7 @@ class Apps(Mode):
 
     def load(self):
         if not self.apps:
-            self.apps = filter(lambda app : app.should_show(), Gio.AppInfo.get_all())
+            self.apps = list(filter(lambda app : app.should_show(), Gio.AppInfo.get_all()))
 
     def get_prefix(self):
         return self.prefix
@@ -51,8 +51,11 @@ class Apps(Mode):
 
     def launch(self, search):
         self.load()
-        for binary in map(lambda app: app.get_executable() if app.get_executable() != '/usr/bin/flatpak' else app.get_commandline(), filter(lambda app: self.create_app_search_result(app) == search, self.apps)):
-            ipc.command('exec --no-startup-id {}'.format(binary))
+        for binary in filter(lambda app: self.create_app_search_result(app) == search, self.apps):
+            exec = binary.get_commandline() or binary.get_executable()
+            # Remove 'options' looking at gio code it replaces options with a space, we don't, white space should be ignored?
+            true_exec = ' '.join(filter(lambda s: not s.startswith('%'), exec.split(' ')))
+            ipc.command('exec --no-startup-id {}'.format(true_exec))
 
 class RecentFiles(Mode):
     def __init__(self):
@@ -61,7 +64,7 @@ class RecentFiles(Mode):
 
     def load(self):
         if not self.files:
-            self.files = filter(lambda file: file.exists(), Gtk.RecentManager.get_default().get_items())
+            self.files = list(filter(lambda file: file.exists(), Gtk.RecentManager.get_default().get_items()))
 
     def get_prefix(self):
         return self.prefix
