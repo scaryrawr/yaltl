@@ -2,6 +2,7 @@
 
 import argparse
 import i3ipc
+import os
 import sys
 
 import gi
@@ -81,6 +82,17 @@ class RecentFiles(Mode):
         for file in filter(lambda file: self.create_recent_file_result(file) == search, self.files):
             ipc.command('exec --no-startup-id xdg-open {}'.format(file.get_uri()))
 
+class Shell(Mode):
+    def __init__(self):
+        self.prefix = 'shell'
+    def get_prefix(self):
+        return self.prefix
+
+    def list(self):
+        os.system("compgen -c | rg '^[A-Za-z]' | sed 's/^/{}: /g' | sort -u -r".format(self.prefix))
+
+    def launch(self, search):
+        ipc.command('exec --no-startup-id {}'.format(search[len('{}: '.format(self.prefix)):]))
 
 class Windows(Mode):
     def __init__(self):
@@ -122,6 +134,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--applications', help='List registered applications', action='store_true')
     parser.add_argument('--recent', help='List recently used files', action='store_true')
+    parser.add_argument('--shell', help='List shell commands', action='store_true')
     parser.add_argument('--windows', help='List active windows', action='store_true')
     parser.add_argument('--preview', help='Perform preview actions', action='store_true')
 
@@ -129,10 +142,14 @@ if __name__ == '__main__':
 
     app_launcher = Apps()
     recent_files = RecentFiles()
+    shell = Shell()
     window_switcher = Windows()
 
     if args.applications:
         app_launcher.list()
+
+    if args.shell:
+        shell.list()
 
     if args.recent:
         recent_files.list()
@@ -140,7 +157,7 @@ if __name__ == '__main__':
     if args.windows:
         window_switcher.list()
 
-    modes = [app_launcher, recent_files, window_switcher]
+    modes = [app_launcher, recent_files, shell, window_switcher]
 
     if not sys.stdin.isatty():
         for line in map(lambda item: item.strip(), sys.stdin):
