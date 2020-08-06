@@ -1,9 +1,9 @@
 #!/bin/env sh
 
 # Get pywal colors if available
-COLORS=$HOME/.cache/wal/colors.sh
+COLORS=$HOME/.cache/wal/sequences
 if [ -f "$COLORS" ]; then
-	source $COLORS
+	(cat "$COLORS" &)
 fi
 
 SCRIPT=`readlink -f "$0"`
