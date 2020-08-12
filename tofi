@@ -10,6 +10,12 @@ SCRIPT=`readlink -f "$0"`
 SCRIPT_DIR=`dirname "$SCRIPT"`
 TOFI="$SCRIPT_DIR/tofib"
 
+# Don't launch if tofi is already running
+pgrep tofi &> /dev/null
+if [[ $? == 0 ]]; then
+	exit 1
+fi
+
 $TOFI --applications | sort -u -r | \
 	fzf --bind "ctrl-w:reload('$TOFI' --windows | sort -u -r)" \
 		--bind "ctrl-a:reload('$TOFI' --applications | sort -u -r)" \
