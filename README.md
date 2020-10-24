@@ -1,31 +1,41 @@
 # tofi
 
-tofi is a terminal launcher for i3/sway using [fzf](https://github.com/junegunn/fzf)
+tofi is a terminal launcher
 
 Why tofi? A play on [toffee](https://en.wikipedia.org/wiki/Toffee), and because there's:
 
 - [rofi](https://github.com/davatorium/rofi)
 - [wofi](https://hg.sr.ht/~scoopta/wofi)
 
-And it's based on using the terminal for UI (so a play on toffee).
+And it's based on using the terminal for UI.
 
 ## Dependencies
 
-- [i3ipc](https://github.com/altdesktop/i3ipc-python)
-- [fzf](https://github.com/junegunn/fzf)
-- [PyGObject](https://pygobject.readthedocs.io/en/latest/)
+- [ftxui](https://github.com/ArthurSonzogni/FTXUI)
+- [giomm](https://developer.gnome.org/glibmm/stable/)
+- [i3ipcpp](https://github.com/drmgc/i3ipcpp)
 
-## Scripts
+## Building
 
-- tofi - launcher script
-- tofib - tofi backend
+```sh
+cd tofi
+mkdir build && cd build
+cmake ..
+make
+sudo make install
+```
 
 ## Modes
 
-- ctrl+a - Application Launcher (default)
-- ctrl+r - Recent files
-- ctrl+w - Active Window Select
-- ctrl+e - Everything
+- drun - Run from installed desktop applications
+- run - Run binary from PATH
+- i3wm - Window switcher for i3wm/sway
+
+## Keyboard shortcuts
+
+- Ctrl+] - Cancel out of tofi
+- Tab - Next Mode
+- Shift+Tab - Previous Mode
 
 ## Configuring i3/Sway
 
@@ -37,9 +47,7 @@ Set up your menu command:
 
 ```shell
 for_window [app_id="tofi"] floating enable, border pixel 2, sticky enable
-
-# Update for the path for where you clone
-set $menu exec alacritty --class tofi -d 80 10 -e sh -c '${HOME}/GitHub/tofi/tofi'
+set $menu exec alacritty --class tofi -d 80 10 -e sh -c 'tofi'
 ```
 
 ### [i3](https://i3wm.org/)
@@ -48,7 +56,5 @@ Set up your menu command:
 
 ```shell
 for_window [instance="tofi"] floating enable, border pixel 2, sticky enable
-
-# Update for the path for where you clone
-set $menu exec alacritty --class tofi -d 80 10 -e sh -c '${HOME}/GitHub/tofi/tofi'
+set $menu exec alacritty --class tofi -d 80 10 -e sh -c 'tofi'
 ```
