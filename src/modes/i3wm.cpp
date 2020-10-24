@@ -97,7 +97,7 @@ namespace tofi
             std::string focus_window(const i3ipc::container_t &con)
             {
                 std::ostringstream command;
-                command << "[name=\"" << con.name << "\"] focus";
+                command << "[title=\"" << con.name << "\"] focus";
 
                 return command.str();
             }
