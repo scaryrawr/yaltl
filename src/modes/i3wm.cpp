@@ -1,5 +1,6 @@
 #include "modes/i3wm.h"
 
+#include "utils/fuzzyresult.h"
 #include "utils/string.h"
 
 #include <i3ipc++/log.hpp>
@@ -14,6 +15,7 @@ namespace tofi
     namespace modes
     {
         using con_t = std::shared_ptr<i3ipc::container_t>;
+        using WindowSearch = FuzzyResult<con_t, wchar_t>;
 
         namespace tree
         {
@@ -116,17 +118,23 @@ namespace tofi
         Results i3wm::results(const std::wstring &search)
         {
             m_active = tree::windows(m_conn.get_tree(), m_self_id);
-            m_active.erase(std::remove_if(std::begin(m_active), std::end(m_active), [&search](con_t con) {
-                               std::wstring name{string::converter.from_bytes(con->name)};
-                               return !(string::insensitive::contains(name, search));
-                           }),
-                           std::end(m_active));
+
+            std::vector<WindowSearch> windows;
+            windows.reserve(m_active.size());
+            std::transform(std::begin(m_active), std::end(m_active), std::back_inserter(windows), [&search](con_t con) {
+                std::wstring name{string::converter.from_bytes(con->name)};
+                return WindowSearch{string::fuzzy_find<wchar_t>(name, search), con};
+            });
+
+            windows.erase(std::remove_if(std::begin(windows), std::end(windows), [&search](const WindowSearch &win) {
+                              return !win.match.has_value();
+                          }),
+                          std::end(windows));
 
             Results results;
-            results.reserve(m_active.size());
-            std::transform(std::begin(m_active), std::end(m_active), std::back_inserter(results), [](con_t con) {
-                con_t::weak_type wptr = con;
-                return Result{string::converter.from_bytes(con->name), con.get()};
+            results.reserve(windows.size());
+            std::transform(std::begin(windows), std::end(windows), std::back_inserter(results), [](const WindowSearch &win) {
+                return Result{string::converter.from_bytes(win.value->name), win.value.get()};
             });
 
             return results;

@@ -1,5 +1,6 @@
 #include "modes/run.h"
 
+#include "utils/fuzzyresult.h"
 #include "utils/spawn.h"
 #include "utils/string.h"
 
@@ -8,12 +9,14 @@
 
 namespace tofi
 {
+    using BinSearch = FuzzyResult<const wchar_t *, wchar_t>;
+
     namespace modes
     {
         run::run() : m_path{std::getenv("PATH")}
         {
             std::vector<std::string> paths;
-            string::split(m_path, std::string{":"}, std::back_inserter(paths));
+            string::split<char>(m_path, ":", std::back_inserter(paths));
 
             for (auto &path : paths)
             {
@@ -33,30 +36,27 @@ namespace tofi
 
         Results run::results(const std::wstring &search)
         {
-            std::vector<const wchar_t *> binaries;
+            std::vector<BinSearch> binaries;
             binaries.reserve(m_binaries.size());
-            std::transform(std::begin(m_binaries), std::end(m_binaries), std::back_inserter(binaries), [](const std::wstring &bin) {
-                return bin.c_str();
-            });
-
-            std::vector<const wchar_t *> filtered;
-            std::copy_if(std::begin(binaries), std::end(binaries), std::back_inserter(filtered), [&search](const wchar_t *bin) {
-                if (search.empty())
-                {
-                    return true;
-                }
-
+            std::transform(std::begin(m_binaries), std::end(m_binaries), std::back_inserter(binaries), [&search](const std::wstring &bin) {
                 std::vector<std::wstring> parts;
-                string::split(search, std::wstring(L" "), std::back_inserter(parts));
+                string::split<wchar_t>(search, L" ", std::back_inserter(parts));
 
                 std::wstring binstr{bin};
-                return string::insensitive::fuzzy_contains(binstr, parts[0]);
+                return BinSearch{string::fuzzy_find<wchar_t>(binstr, parts.empty() ? L"" : parts[0]), bin.c_str()};
             });
 
+            binaries.erase(std::remove_if(std::begin(binaries), std::end(binaries), [](const BinSearch &res) {
+                               return !res.match.has_value();
+                           }),
+                           std::end(binaries));
+
+            std::sort(std::begin(binaries), std::end(binaries));
+
             Results results;
-            results.reserve(filtered.size());
-            std::transform(std::begin(filtered), std::end(filtered), std::back_inserter(results), [](const wchar_t *bin) {
-                return Result{bin, bin};
+            results.reserve(binaries.size());
+            std::transform(std::begin(binaries), std::end(binaries), std::back_inserter(results), [](const BinSearch &bin) {
+                return Result{bin.value, bin.value};
             });
 
             return results;
@@ -69,7 +69,7 @@ namespace tofi
             const wchar_t *cmd{wcslen(bin) > result.display.length() ? bin : result.display.c_str()};
             std::string command = string::converter.to_bytes(cmd);
             std::vector<std::string> parts;
-            string::split(command, std::string(" "), std::back_inserter(parts));
+            string::split<char>(command, " ", std::back_inserter(parts));
 
             // Incase there was a typo for the first word
             parts[0] = string::converter.to_bytes(bin);

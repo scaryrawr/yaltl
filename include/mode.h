@@ -8,15 +8,11 @@ namespace tofi
 {
     struct Result
     {
-        Result(std::wstring display, const void *context) : display{std::move(display)}, context{context}
-        {
-        }
-
         //! The string to display in the results list when coming from the mode, or the user input when being sent to the mode
         std::wstring display;
 
         //! The context for the result for the mode if the result is selected or executed
-        const void *context;
+        const void *context{};
 
         auto operator<=>(const Result &) const = default;
     };

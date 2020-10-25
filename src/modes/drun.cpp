@@ -1,5 +1,6 @@
 #include "modes/drun.h"
 #include "utils/command.h"
+#include "utils/fuzzyresult.h"
 #include "utils/spawn.h"
 #include "utils/string.h"
 
@@ -9,6 +10,8 @@
 namespace tofi
 {
     using AppInfo = Glib::RefPtr<Gio::AppInfo>;
+
+    using AppSearch = FuzzyResult<AppInfo, wchar_t>;
 
     namespace modes
     {
@@ -23,19 +26,19 @@ namespace tofi
             std::string full_command{info->get_commandline()};
 
             // Remove special placeholders for AppInfo entry
-            string::insensitive::erase_all(full_command, std::string{"%u"});
-            string::insensitive::erase_all(full_command, std::string{"%f"});
+            string::insensitive::erase_all<char>(full_command, "%u");
+            string::insensitive::erase_all<char>(full_command, "%f");
 
             return spawn(full_command);
         }
 
         Results drun::results(const std::wstring &search)
         {
-            std::vector<AppInfo> results;
-            std::copy_if(std::begin(m_apps), std::end(m_apps), std::back_inserter(results), [&search](AppInfo appinfo) {
+            std::vector<AppSearch> results;
+            std::transform(std::begin(m_apps), std::end(m_apps), std::back_inserter(results), [&search](AppInfo appinfo) {
                 if (!appinfo->should_show())
                 {
-                    return false;
+                    return AppSearch{std::nullopt, appinfo};
                 }
 
                 std::vector<std::wstring> fields;
@@ -46,14 +49,39 @@ namespace tofi
                 Command command{commands::parse(appinfo->get_commandline())};
                 fields.emplace_back(string::converter.from_bytes(command.path.filename()));
 
-                return std::any_of(std::begin(fields), std::end(fields), [&search](const std::wstring &field) {
-                    return string::insensitive::fuzzy_contains(field, search);
+                std::vector<std::optional<std::wstring>> matches;
+                std::transform(std::begin(fields), std::end(fields), std::back_inserter(matches), [&search](const std::wstring &field) {
+                    return string::fuzzy_find<wchar_t>(field, search);
                 });
+
+                matches.erase(std::remove_if(std::begin(matches), std::end(matches), [](auto &val) {
+                                  return !val.has_value();
+                              }),
+                              std::end(matches));
+
+                std::sort(std::begin(matches), std::end(matches), [](auto &lhs, auto &rhs) {
+                    return lhs.value().length() < rhs.value().length();
+                });
+
+                if (matches.empty())
+                {
+                    return AppSearch{std::nullopt, appinfo};
+                }
+
+                return AppSearch{std::move(matches[0]), appinfo};
             });
+
+            results.erase(std::remove_if(std::begin(results), std::end(results), [](const AppSearch &res) {
+                              return !res.match.has_value();
+                          }),
+                          std::end(results));
+
+            std::sort(std::begin(results), std::end(results));
 
             Results retval;
             retval.reserve(results.size());
-            std::transform(std::begin(results), std::end(results), std::back_inserter(retval), [](AppInfo appinfo) {
+            std::transform(std::begin(results), std::end(results), std::back_inserter(retval), [](const AppSearch &res) {
+                AppInfo appinfo = res.value;
                 const std::string description{appinfo->get_description()};
                 std::string name{appinfo->get_display_name()};
                 name = name.empty() ? appinfo->get_name() : name;
@@ -66,8 +94,6 @@ namespace tofi
 
                 return result;
             });
-
-            std::sort(std::begin(retval), std::end(retval));
 
             return retval;
         }
