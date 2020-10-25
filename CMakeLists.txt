@@ -16,7 +16,7 @@ pkg_check_modules(GIOMM REQUIRED giomm-2.4)
 include(FetchContent)
 FetchContent_Declare(
     ftxui
-    GIT_REPOSITORY https://github.com/scaryrawr/ftxui
+    GIT_REPOSITORY https://github.com/ArthurSonzogni/FTXUI
 )
 
 FetchContent_Declare(
