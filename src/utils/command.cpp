@@ -8,7 +8,7 @@ namespace tofi
         Command parse(const std::string &commandline)
         {
             std::vector<std::string> argv;
-            string::split<char>(commandline, " ", std::back_inserter(argv));
+            string::split<char, std::string>(commandline, " ", std::back_inserter(argv));
             argv.erase(std::remove_if(std::begin(argv), std::end(argv), [](const std::string &str) {
                            return str.empty();
                        }),

@@ -15,8 +15,8 @@ namespace tofi
     {
         run::run() : m_path{std::getenv("PATH")}
         {
-            std::vector<std::string> paths;
-            string::split<char>(m_path, ":", std::back_inserter(paths));
+            std::vector<std::string_view> paths;
+            string::split<char, std::string_view>(m_path, ":", std::back_inserter(paths));
 
             for (auto &path : paths)
             {
@@ -39,8 +39,8 @@ namespace tofi
             std::vector<BinSearch> binaries;
             binaries.reserve(m_binaries.size());
             std::transform(std::begin(m_binaries), std::end(m_binaries), std::back_inserter(binaries), [&search](const std::wstring &bin) {
-                std::vector<std::wstring> parts;
-                string::split<wchar_t>(search, L" ", std::back_inserter(parts));
+                std::vector<std::wstring_view> parts;
+                string::split<wchar_t, std::wstring_view>(search, L" ", std::back_inserter(parts));
 
                 std::wstring binstr{bin};
                 return BinSearch{string::fuzzy_find<wchar_t>(binstr, parts.empty() ? L"" : parts[0]), bin.c_str()};
@@ -67,14 +67,17 @@ namespace tofi
             // User might have typed args to pass to the command as well
             const wchar_t *bin{static_cast<const wchar_t *>(result.context)};
             std::string command = string::converter.to_bytes(result.display.c_str());
+            std::vector<std::string_view> parts;
+            string::split<char, std::string_view>(command, " ", std::back_inserter(parts));
 
-            // Incase there was a typo for the first word
-            parts[0] = string::converter.to_bytes(bin);
-            command = std::accumulate(std::begin(parts), std::end(parts), std::string(""), [](std::string &&init, std::string &part) {
-                return init.empty() ? part : (init + " " + part);
-            });
+            std::ostringstream spawnargs;
 
-            return spawn(command);
+            // We may have showed early results, so use what was from the list
+            spawnargs << string::converter.to_bytes(bin) << " ";
+
+            std::copy(std::begin(parts) + 1, std::end(parts), std::ostream_iterator<std::string_view>(spawnargs, " "));
+
+            return spawn(spawnargs.str());
         }
     } // namespace modes
 

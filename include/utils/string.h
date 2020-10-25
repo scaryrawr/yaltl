@@ -61,20 +61,20 @@ namespace tofi
             return results[0];
         }
 
-        template <class CharT, class OutItr>
+        template <class CharT, class OutType, class OutItr>
         auto split(std::basic_string_view<CharT> str, std::basic_string_view<CharT> delim, OutItr out)
         {
             size_t position = 0;
             size_t delim_len = delim.length();
             for (auto pos{str.find(delim)}; pos != std::basic_string_view<CharT>::npos; pos = str.find(delim, position))
             {
-                (*out++) = std::basic_string<CharT>(str.substr(position, pos - position));
+                (*out++) = OutType(str.substr(position, pos - position));
                 position = pos + delim_len;
             }
 
             if (position < str.length())
             {
-                (*out++) = std::basic_string<CharT>(str.substr(position, str.length() - position));
+                (*out++) = OutType(str.substr(position, str.length() - position));
             }
 
             return out;
