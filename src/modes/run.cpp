@@ -66,10 +66,7 @@ namespace tofi
         {
             // User might have typed args to pass to the command as well
             const wchar_t *bin{static_cast<const wchar_t *>(result.context)};
-            const wchar_t *cmd{wcslen(bin) > result.display.length() ? bin : result.display.c_str()};
-            std::string command = string::converter.to_bytes(cmd);
-            std::vector<std::string> parts;
-            string::split<char>(command, " ", std::back_inserter(parts));
+            std::string command = string::converter.to_bytes(result.display.c_str());
 
             // Incase there was a typo for the first word
             parts[0] = string::converter.to_bytes(bin);
