@@ -19,15 +19,15 @@ namespace tofi
                 exit(errno);
             }
 
+            pid = setsid();
+            if (pid < 0)
+            {
+                exit(errno);
+            }
+
             pid = fork();
             if (0 == pid)
             {
-                pid = setsid();
-                if (pid < 0)
-                {
-                    exit(errno);
-                }
-
                 Command command{commands::parse(full_command)};
 
                 std::vector<char *> argv{command.argv.size() + 1, nullptr};
@@ -48,6 +48,7 @@ namespace tofi
 
         int stat{};
         waitpid(pid, &stat, 0);
+
         return WIFEXITED(stat) && 0 == WEXITSTATUS(stat);
     }
 } // namespace tofi
