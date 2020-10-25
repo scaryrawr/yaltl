@@ -26,7 +26,7 @@ namespace tofi
         Add(&m_container);
         m_container.Add(&m_search);
 
-        m_results.selected_style = ftxui::bold | ftxui::color(ftxui::Color::CyanLight);
+        m_results.selected_style = ftxui::bold | ftxui::color(ftxui::Color::Black) | ftxui::bgcolor(ftxui::Color::Green);
         m_results.selected = 0;
         m_container.Add(&m_results);
     }
