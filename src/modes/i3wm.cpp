@@ -28,7 +28,7 @@ namespace tofi
                     "polybar",
                 };
 
-                const std::string &winclass{con->map.contains(APP_ID) ? con->map[APP_ID] : con->window_properties.instance};
+                const std::string &winclass{con->app_id.value_or(con->window_properties.instance)};
                 return std::any_of(std::begin(IGNORE_LIST), std::end(IGNORE_LIST), [&winclass](const char *toIgnore) {
                     return winclass == toIgnore;
                 });
@@ -41,8 +41,7 @@ namespace tofi
                     return;
                 }
 
-                const bool isTofi{(con->map.contains(APP_ID) && con->map[APP_ID] == self) ||
-                                  (con->window_properties.instance == self)};
+                const bool isTofi{(con->app_id.value_or(con->window_properties.instance) == self)};
                 if (!isTofi && !ignore_listed(con) && con->nodes.empty() && con->floating_nodes.empty() && (con->type == "con" || con->type == "floating_con"))
                 {
                     wins.push_back(con);
@@ -78,18 +77,24 @@ namespace tofi
                 return command.str();
             }
 
-            std::string move_window(bool appId, const std::string &window_id, const std::string &workspace)
+            const char *get_instance_string()
+            {
+                static const char *instance{std::string(std::getenv("I3SOCK")).find("sway") != std::string::npos ? APP_ID : INSTANCE_ID};
+                return instance;
+            }
+
+            std::string move_instance(const std::string &window_id, const std::string &workspace)
             {
                 std::ostringstream command;
-                command << "[" << (appId ? APP_ID : INSTANCE_ID) << "=\"" << window_id << "\"] move to workspace " << workspace;
+                command << "[" << get_instance_string() << "=\"" << window_id << "\"] move to workspace " << workspace;
 
                 return command.str();
             }
 
-            std::string focus_window(bool appId, const std::string &window_id)
+            std::string focus_instance(const std::string &window_id)
             {
                 std::ostringstream command;
-                command << "[" << (appId ? APP_ID : INSTANCE_ID) << "=\"" << window_id << "\"] focus";
+                command << "[" << get_instance_string() << "=\"" << window_id << "\"] focus";
 
                 return command.str();
             }
@@ -135,10 +140,9 @@ namespace tofi
                 return;
             }
 
-            const bool usesAppid{con->map.contains(APP_ID)};
             m_conn.send_command(commands::switch_to_workspace(con->workspace.value()));
-            m_conn.send_command(commands::move_window(usesAppid, m_self_id, con->workspace.value()));
-            m_conn.send_command(commands::focus_window(usesAppid, m_self_id));
+            m_conn.send_command(commands::move_instance(m_self_id, con->workspace.value()));
+            m_conn.send_command(commands::focus_instance(m_self_id));
         }
 
         bool i3wm::execute(const Result &result)
