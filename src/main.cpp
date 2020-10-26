@@ -134,6 +134,11 @@ int main(int argc, char **argv)
 
 	modes.erase(std::remove(std::begin(modes), std::end(modes), nullptr), std::end(modes));
 
+	if (modes.empty())
+	{
+		help();
+	}
+
 	tofi::Tofi tofi{std::move(modes)};
 	int exit{};
 	auto screen = ftxui::ScreenInteractive::TerminalOutput();
