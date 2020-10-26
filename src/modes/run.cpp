@@ -5,6 +5,7 @@
 #include "utils/string.h"
 
 #include <cstdlib>
+#include <filesystem>
 #include <numeric>
 
 namespace tofi
@@ -20,6 +21,11 @@ namespace tofi
 
             for (auto &path : paths)
             {
+                if (!std::filesystem::exists(path))
+                {
+                    continue;
+                }
+
                 std::filesystem::directory_iterator dir{path};
                 std::transform(std::filesystem::begin(dir), std::filesystem::end(dir), std::back_inserter(m_binaries), [](const std::filesystem::directory_entry &entry) {
                     return string::converter.from_bytes(entry.path().filename().string());
