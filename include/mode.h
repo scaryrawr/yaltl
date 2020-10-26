@@ -19,6 +19,13 @@ namespace tofi
 
     using Results = std::vector<Result>;
 
+    enum class PostExec
+    {
+        CloseSuccess,
+        CloseFailure,
+        StayOpen,
+    };
+
     class Mode
     {
     public:
@@ -49,7 +56,7 @@ namespace tofi
          * @param result The result to execute
          * @return The result of the execution
          */
-        virtual bool execute(const Result &result) = 0;
+        virtual PostExec execute(const Result &result) = 0;
     };
 
     using Modes = std::vector<std::unique_ptr<Mode>>;

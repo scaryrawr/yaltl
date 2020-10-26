@@ -30,10 +30,13 @@ sudo make install
 - drun - Run from installed desktop applications
 - run - Run binary from PATH
 - i3wm - Window switcher for i3wm/sway
+- Script - Run a script
+  - Results will be passed back to the script
+  - Continued output to stdout will cause tofi to continue to display the new results
 
 ## Keyboard shortcuts
 
-- Ctrl+] - Cancel out of tofi
+- Ctrl+]/Esc - Cancel out of tofi
 - Tab - Next Mode
 - Shift+Tab - Previous Mode
 
@@ -47,7 +50,7 @@ Set up your menu command:
 
 ```shell
 for_window [app_id="tofi"] floating enable, border pixel 2, sticky enable
-set $menu exec alacritty --class tofi -d 80 10 -e sh -c 'tofi'
+set $menu exec alacritty --class tofi -d 80 10 -e sh -c 'tofi -m drun,run,i3wm'
 ```
 
 ### [i3](https://i3wm.org/)
@@ -56,5 +59,5 @@ Set up your menu command:
 
 ```shell
 for_window [instance="tofi"] floating enable, border pixel 2, sticky enable
-set $menu exec alacritty --class tofi -d 80 10 -e sh -c 'tofi'
+set $menu exec alacritty --class tofi -d 80 10 -e sh -c 'tofi -m drun,run,i3wm,custom:cmd'
 ```

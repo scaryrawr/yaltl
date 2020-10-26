@@ -20,7 +20,7 @@ namespace tofi
         {
         }
 
-        bool drun::execute(const Result &result)
+        PostExec drun::execute(const Result &result)
         {
             auto info{static_cast<const Gio::AppInfo *>(result.context)};
             std::string full_command{info->get_commandline()};
@@ -29,7 +29,7 @@ namespace tofi
             string::insensitive::erase_all<char>(full_command, "%u");
             string::insensitive::erase_all<char>(full_command, "%f");
 
-            return spawn(full_command);
+            return spawn(full_command) ? PostExec::CloseSuccess : PostExec::CloseFailure;
         }
 
         Results drun::results(const std::wstring &search)

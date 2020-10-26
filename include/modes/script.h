@@ -1,31 +1,33 @@
 #pragma once
 
 #include "../mode.h"
-#include <giomm/appinfo.h>
-#include <giomm/desktopappinfo.h>
+
+#include <string>
+#include <string_view>
+#include <vector>
 
 namespace tofi
 {
     namespace modes
     {
-        class drun : public Mode
+        class script : public Mode
         {
         public:
-            explicit drun();
-
-            ~drun() = default;
+            script(std::string_view name, std::string_view script);
 
             std::wstring name() const override
             {
-                return L"drun";
+                return m_name;
             }
 
             Results results(const std::wstring &search) override;
-
             PostExec execute(const Result &result) override;
 
         private:
-            Glib::ListHandle<Glib::RefPtr<Gio::AppInfo>> m_apps;
+            std::wstring m_name;
+            std::string m_script;
+            std::vector<std::wstring> m_results;
         };
-    } //namespace modes
+    } // namespace modes
+
 } // namespace tofi

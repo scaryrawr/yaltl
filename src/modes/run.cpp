@@ -62,7 +62,7 @@ namespace tofi
             return results;
         }
 
-        bool run::execute(const Result &result)
+        PostExec run::execute(const Result &result)
         {
             // User might have typed args to pass to the command as well
             const wchar_t *bin{static_cast<const wchar_t *>(result.context)};
@@ -77,7 +77,7 @@ namespace tofi
 
             std::copy(std::begin(parts) + 1, std::end(parts), std::ostream_iterator<std::string_view>(spawnargs, " "));
 
-            return spawn(spawnargs.str());
+            return spawn(spawnargs.str()) ? PostExec::CloseSuccess : PostExec::CloseFailure;
         }
     } // namespace modes
 

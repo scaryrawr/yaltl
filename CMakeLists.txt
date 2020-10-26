@@ -35,6 +35,7 @@ add_executable(tofi
                ./src/modes/drun.cpp
                ./src/modes/i3wm.cpp
                ./src/modes/run.cpp
+               ./src/modes/script.cpp
                ./src/utils/command.cpp
                ./src/utils/spawn.cpp)
 

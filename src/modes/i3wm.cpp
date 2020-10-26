@@ -153,15 +153,15 @@ namespace tofi
             m_conn.send_command(commands::focus_instance(m_self_id));
         }
 
-        bool i3wm::execute(const Result &result)
+        PostExec i3wm::execute(const Result &result)
         {
             auto con{static_cast<const i3ipc::container_t *>(result.context)};
             if (!con)
             {
-                return false;
+                return PostExec::CloseFailure;
             }
 
-            return m_conn.send_command(commands::focus_window(*con));
+            return m_conn.send_command(commands::focus_window(*con)) ? PostExec::CloseSuccess : PostExec::CloseFailure;
         }
     } // namespace modes
 

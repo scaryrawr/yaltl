@@ -15,10 +15,17 @@ namespace tofi
             {
                 Result result{m_activeResults[this->m_results.selected]};
                 result.display = m_search.content;
-                const bool success{m_modes[m_mode]->execute(result)};
-                if (on_exit)
+                const PostExec postAction{m_modes[m_mode]->execute(result)};
+                switch (postAction)
                 {
-                    on_exit(success ? 0 : -1);
+                case PostExec::StayOpen:
+                    break;
+                case PostExec::CloseFailure:
+                    on_exit(-1);
+                    break;
+                case PostExec::CloseSuccess:
+                    on_exit(0);
+                    break;
                 }
             }
         };

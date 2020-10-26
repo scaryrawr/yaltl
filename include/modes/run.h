@@ -14,14 +14,14 @@ namespace tofi
         public:
             explicit run();
 
-            std::wstring name() const
+            std::wstring name() const override
             {
                 return L"run";
             }
 
-            Results results(const std::wstring &search);
+            Results results(const std::wstring &search) override;
 
-            bool execute(const Result &result);
+            PostExec execute(const Result &result) override;
 
         private:
             std::string m_path;
