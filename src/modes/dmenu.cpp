@@ -44,13 +44,11 @@ namespace tofi
             if (m_fdout.has_value())
             {
                 dup2(m_fdout.value(), STDOUT_FILENO);
-                close(m_fdout.value());
             }
 
             if (m_fdin.has_value())
             {
                 dup2(m_fdin.value(), STDIN_FILENO);
-                close(m_fdin.value());
             }
         }
 
@@ -84,14 +82,13 @@ namespace tofi
         PostExec dmenu::execute(const Result &result)
         {
             // Restore the original stdout so we can write to the next process in the pipeline
+            int tty{dup(STDOUT_FILENO)};
             dup2(m_fdout.value(), STDOUT_FILENO);
-            close(m_fdout.value());
-            m_fdout.reset();
 
             std::wcout << static_cast<const wchar_t *>(result.context) << std::endl;
 
             // I think FTXUI outputs some things as it closes, since we're exiting anyways, close of stdout to keep the pipe clean.
-            close(STDOUT_FILENO);
+            dup2(tty, STDOUT_FILENO);
 
             return PostExec::CloseSuccess;
         }
