@@ -35,5 +35,7 @@ namespace tofi
         int32_t m_mode{};
         Modes m_modes;
         Results m_activeResults;
+        std::optional<std::wstring> m_previousSearch;
+        std::optional<int32_t> m_previousMode;
     };
 } // namespace tofi

@@ -119,12 +119,20 @@ namespace tofi
 
     ftxui::Element Tofi::Render()
     {
-        m_activeResults = m_modes[m_mode]->results(m_search.content);
-        m_results.entries.clear();
-        m_results.entries.reserve(m_activeResults.size());
-        std::transform(std::begin(m_activeResults), std::end(m_activeResults), std::back_insert_iterator(m_results.entries), [](const Result &result) {
-            return result.display;
-        });
+        if (!m_previousSearch.has_value() ||                // First run
+            m_search.content != m_previousSearch.value() || // Search change
+            !m_previousMode.has_value() ||                  // First run mode
+            m_mode != m_previousMode.value())               // mode change
+        {
+            m_previousSearch = m_search.content;
+            m_previousMode = m_mode;
+
+            m_activeResults = m_modes[m_mode]->results(m_search.content);
+            m_results.entries.resize(m_activeResults.size());
+            std::transform(std::begin(m_activeResults), std::end(m_activeResults), std::begin(m_results.entries), [](const Result &result) {
+                return result.display;
+            });
+        }
 
         if (m_results.selected >= m_results.entries.size())
         {
