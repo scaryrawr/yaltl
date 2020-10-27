@@ -55,9 +55,17 @@ set $menu exec alacritty --class tofi -d 80 10 -e sh -c 'tofi -m drun,run,i3wm'
 
 ### [i3](https://i3wm.org/)
 
+i3 appears to have parse errors when trying to launch tofi with args, so we use a launch script.
+
+Create a launch script `~/.config/i3/scripts/launch_tofi`:
+```sh
+#!/usr/bin/env sh
+tofi -m drun,run,i3wm
+```
+
 Set up your menu command:
 
 ```shell
 for_window [instance="tofi"] floating enable, border pixel 2, sticky enable
-set $menu exec alacritty --class tofi -d 80 10 -e sh -c 'tofi -m drun,run,i3wm,custom:cmd'
+set $menu exec alacritty --class tofi -d 80 10 -e sh -c '~/.config/i3/scripts/launch_tofi'
 ```
