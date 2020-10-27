@@ -2,6 +2,7 @@
 
 #include "../mode.h"
 
+#include <future>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -26,7 +27,8 @@ namespace tofi
         private:
             std::wstring m_name;
             std::string m_script;
-            std::vector<std::wstring> m_results;
+            std::future<std::vector<std::wstring>> m_loader;
+            std::optional<std::vector<std::wstring>> m_results;
         };
     } // namespace modes
 

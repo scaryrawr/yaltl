@@ -32,6 +32,7 @@ FetchContent_MakeAvailable(i3ipc++)
 add_executable(tofi
                ./src/main.cpp
                ./src/tofi.cpp
+               ./src/modes/dmenu.cpp
                ./src/modes/drun.cpp
                ./src/modes/i3wm.cpp
                ./src/modes/run.cpp

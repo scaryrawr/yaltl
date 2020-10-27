@@ -1,5 +1,6 @@
 #include "tofi.h"
 
+#include "modes/dmenu.h"
 #include "modes/drun.h"
 #include "modes/i3wm.h"
 #include "modes/run.h"
@@ -28,6 +29,7 @@ void help()
 	std::cout << "tofi usage:" << std::endl
 			  << "\ttofi [--options]" << std::endl
 			  << "Options:" << std::endl
+			  << "\t-d, --dmenu\tRun in dmenu mode" << std::endl
 			  << "\t-m, --modes\tStart with modes enabled [drun,run,i3wm]" << std::endl
 			  << "\t-h, --help \tDisplay this message" << std::endl
 			  << "Modes:" << std::endl
@@ -50,11 +52,13 @@ LaunchOptions parse_args(int argc, char **argv)
 	enum class Option
 	{
 		modes,
+		dmenu,
 		help,
 	};
 
 	static option options[] = {
 		{"modes", required_argument, nullptr, 0},
+		{"dmenu", no_argument, nullptr, 0},
 		{"help", no_argument, nullptr, 0},
 	};
 
@@ -62,6 +66,9 @@ LaunchOptions parse_args(int argc, char **argv)
 	{
 		switch (code)
 		{
+		case 'd':
+			index = static_cast<int>(Option::dmenu);
+			break;
 		case 'm':
 			index = static_cast<int>(Option::modes);
 			break;
@@ -72,6 +79,11 @@ LaunchOptions parse_args(int argc, char **argv)
 
 		switch (static_cast<Option>(index))
 		{
+		case Option::dmenu:
+		{
+			launch.dmenu = true;
+			break;
+		}
 		case Option::modes:
 		{
 			std::vector<std::string_view> modes;
@@ -99,38 +111,42 @@ LaunchOptions parse_args(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-	// Use active wal theme if available
-	system("[ -f $HOME/.cache/wal/sequences ] && cat $HOME/.cache/wal/sequences");
-
 	LaunchOptions options{parse_args(argc, argv)};
 
 	Gio::init();
 
 	tofi::Modes modes;
 
-	std::transform(std::begin(options.modes), std::end(options.modes), std::back_inserter(modes), [](const LaunchMode &mode) -> std::unique_ptr<tofi::Mode> {
-		if (mode.script.has_value())
-		{
-			return std::make_unique<tofi::modes::script>(mode.mode, mode.script.value());
-		}
+	if (options.dmenu)
+	{
+		modes.emplace_back(std::make_unique<tofi::modes::dmenu>());
+	}
+	else
+	{
+		std::transform(std::begin(options.modes), std::end(options.modes), std::back_inserter(modes), [](const LaunchMode &mode) -> std::unique_ptr<tofi::Mode> {
+			if (mode.script.has_value())
+			{
+				return std::make_unique<tofi::modes::script>(mode.mode, mode.script.value());
+			}
 
-		if ("i3wm" == mode.mode)
-		{
-			return std::make_unique<tofi::modes::i3wm>("tofi");
-		}
+			if ("i3wm" == mode.mode)
+			{
+				return std::make_unique<tofi::modes::i3wm>("tofi");
+			}
 
-		if ("run" == mode.mode)
-		{
-			return std::make_unique<tofi::modes::run>();
-		}
+			if ("run" == mode.mode)
+			{
+				return std::make_unique<tofi::modes::run>();
+			}
 
-		if ("drun" == mode.mode)
-		{
-			return std::make_unique<tofi::modes::drun>();
-		}
+			if ("drun" == mode.mode)
+			{
+				return std::make_unique<tofi::modes::drun>();
+			}
 
-		return nullptr;
-	});
+			return nullptr;
+		});
+	}
 
 	modes.erase(std::remove(std::begin(modes), std::end(modes), nullptr), std::end(modes));
 
@@ -138,6 +154,9 @@ int main(int argc, char **argv)
 	{
 		help();
 	}
+
+	// Use active wal theme if available
+	system("[ -f $HOME/.cache/wal/sequences ] && cat $HOME/.cache/wal/sequences");
 
 	tofi::Tofi tofi{std::move(modes)};
 	int exit{};
