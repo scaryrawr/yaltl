@@ -1,4 +1,5 @@
 #include "modes/drun.h"
+#include "glibmm/listhandle.h"
 #include "utils/command.h"
 #include "utils/fuzzyresult.h"
 #include "utils/spawn.h"
@@ -15,8 +16,14 @@ namespace tofi
 
     namespace modes
     {
+        std::future<Glib::ListHandle<AppInfo>> load_apps()
+        {
+            return std::async(std::launch::async, [] {
+                return Gio::AppInfo::get_all();
+            });
+        }
 
-        drun::drun() : m_apps{Gio::AppInfo::get_all()}
+        drun::drun() : m_load{load_apps()}
         {
         }
 
@@ -34,8 +41,13 @@ namespace tofi
 
         Results drun::results(const std::wstring &search)
         {
+            if (!m_apps.has_value())
+            {
+                m_apps.emplace(std::move(m_apps.value_or(m_load.get())));
+            }
+
             std::vector<AppSearch> results;
-            std::transform(std::begin(m_apps), std::end(m_apps), std::back_inserter(results), [&search](AppInfo appinfo) {
+            std::transform(std::begin(m_apps.value()), std::end(m_apps.value()), std::back_inserter(results), [&search](AppInfo appinfo) {
                 if (!appinfo->should_show())
                 {
                     return AppSearch{std::nullopt, appinfo};

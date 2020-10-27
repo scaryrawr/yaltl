@@ -2,6 +2,8 @@
 
 #include "../mode.h"
 
+#include <future>
+#include <optional>
 #include <vector>
 #include <filesystem>
 
@@ -24,8 +26,8 @@ namespace tofi
             PostExec execute(const Result &result) override;
 
         private:
-            std::string m_path;
-            std::vector<std::wstring> m_binaries;
+            std::future<std::vector<std::wstring>> m_loader;
+            std::optional<std::vector<std::wstring>> m_binaries;
         };
     } // namespace modes
 

@@ -5,6 +5,7 @@
 #include "utils/string.h"
 
 #include <cstdlib>
+#include <algorithm>
 #include <filesystem>
 #include <numeric>
 
@@ -14,37 +15,59 @@ namespace tofi
 
     namespace modes
     {
-        run::run() : m_path{std::getenv("PATH")}
+        std::future<std::vector<std::wstring>> load()
         {
-            std::vector<std::string_view> paths;
-            string::split<char, std::string_view>(m_path, ":", std::back_inserter(paths));
+            return std::async(std::launch::async, []() -> std::vector<std::wstring> {
+                const char *path{std::getenv("PATH")};
 
-            for (auto &path : paths)
-            {
-                if (!std::filesystem::exists(path))
+                // There is no path environment
+                if (!path)
                 {
-                    continue;
+                    return {};
                 }
 
-                std::filesystem::directory_iterator dir{path};
-                std::transform(std::filesystem::begin(dir), std::filesystem::end(dir), std::back_inserter(m_binaries), [](const std::filesystem::directory_entry &entry) {
-                    return string::converter.from_bytes(entry.path().filename().string());
-                });
-            }
+                std::vector<std::string_view> paths;
+                string::split<char, std::string_view>(path, ":", std::back_inserter(paths));
 
-            std::sort(std::begin(m_binaries), std::end(m_binaries));
-            m_binaries.erase(std::unique(std::begin(m_binaries), std::end(m_binaries)), std::end(m_binaries));
-            m_binaries.erase(std::remove_if(std::begin(m_binaries), std::end(m_binaries), [](const std::wstring &bin) {
-                                 return bin.starts_with(L'.') || bin.starts_with(L'[') || bin.empty();
-                             }),
-                             std::end(m_binaries));
+                std::vector<std::wstring> binaries;
+
+                for (auto &path : paths)
+                {
+                    if (!std::filesystem::exists(path))
+                    {
+                        continue;
+                    }
+
+                    std::filesystem::directory_iterator dir{path};
+                    std::transform(std::filesystem::begin(dir), std::filesystem::end(dir), std::back_inserter(binaries), [](const std::filesystem::directory_entry &entry) {
+                        return string::converter.from_bytes(entry.path().filename().string());
+                    });
+                }
+
+                std::sort(std::begin(binaries), std::end(binaries));
+                binaries.erase(std::unique(std::begin(binaries), std::end(binaries)), std::end(binaries));
+                binaries.erase(std::remove_if(std::begin(binaries), std::end(binaries), [](const std::wstring &bin) {
+                                   return bin.starts_with(L'.') || bin.starts_with(L'[') || bin.empty();
+                               }),
+                               std::end(binaries));
+                return binaries;
+            });
+        }
+
+        run::run() : m_loader{load()}
+        {
         }
 
         Results run::results(const std::wstring &search)
         {
+            if (!m_binaries.has_value())
+            {
+                m_binaries.emplace(m_loader.get());
+            }
+
             std::vector<BinSearch> binaries;
-            binaries.reserve(m_binaries.size());
-            std::transform(std::begin(m_binaries), std::end(m_binaries), std::back_inserter(binaries), [&search](const std::wstring &bin) {
+            binaries.reserve(m_binaries.value().size());
+            std::transform(std::begin(m_binaries.value()), std::end(m_binaries.value()), std::back_inserter(binaries), [&search](const std::wstring &bin) {
                 std::vector<std::wstring_view> parts;
                 string::split<wchar_t, std::wstring_view>(search, L" ", std::back_inserter(parts));
 

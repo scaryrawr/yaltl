@@ -3,6 +3,7 @@
 #include "../mode.h"
 #include <giomm/appinfo.h>
 #include <giomm/desktopappinfo.h>
+#include <future>
 
 namespace tofi
 {
@@ -25,7 +26,8 @@ namespace tofi
             PostExec execute(const Result &result) override;
 
         private:
-            Glib::ListHandle<Glib::RefPtr<Gio::AppInfo>> m_apps;
+            std::future<Glib::ListHandle<Glib::RefPtr<Gio::AppInfo>>> m_load;
+            std::optional<Glib::ListHandle<Glib::RefPtr<Gio::AppInfo>>> m_apps;
         };
     } //namespace modes
 } // namespace tofi
