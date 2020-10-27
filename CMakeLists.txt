@@ -25,9 +25,16 @@ FetchContent_Declare(
     GIT_TAG origin/main
 )
 
+FetchContent_Declare(
+    mtl
+    GIT_REPOSITORY https://github.com/scaryrawr/mtl
+    GIT_TAG origin/main
+)
+
 set(FETCHCONTENT_QUIET OFF)
 FetchContent_MakeAvailable(ftxui)
 FetchContent_MakeAvailable(i3ipc++)
+FetchContent_MakeAvailable(mtl)
 
 add_executable(tofi
                ./src/main.cpp
@@ -42,7 +49,7 @@ add_executable(tofi
 
 target_include_directories(tofi PRIVATE include)
 
-target_link_libraries(tofi ftxui::screen ftxui::dom ftxui::component i3ipc++ ${GIOMM_LIBRARIES})
+target_link_libraries(tofi ftxui::screen ftxui::dom ftxui::component i3ipc++ mtl ${GIOMM_LIBRARIES})
 target_include_directories(tofi PRIVATE ${GIOMM_INCLUDE_DIRS})
 target_compile_options(tofi PRIVATE ${GIOMM_CFLAGS_OTHER})
 

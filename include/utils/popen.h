@@ -3,32 +3,16 @@
 #include "utils/string.h"
 
 #include <cstdio>
-#include <memory>
 #include <sstream>
 #include <string>
 #include <vector>
 
+#include <mtl/memory.hpp>
+
 namespace tofi
 {
-    struct pclose
-    {
-        void operator()(FILE *stream)
-        {
-            ::pclose(stream);
-        }
-    };
-
-    struct fclose
-    {
-        void operator()(FILE *file)
-        {
-            ::fclose(file);
-        }
-    };
-
-    using unique_file = std::unique_ptr<FILE, fclose>;
-
-    using unique_pfile = std::unique_ptr<FILE, pclose>;
+    using unique_file = mtl::unique_ptr<decltype(::fclose), &::fclose>;
+    using unique_pfile = mtl::unique_ptr<decltype(::pclose), &::pclose>;
 
     /**
      * @brief Reads all output from a command
