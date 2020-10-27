@@ -27,6 +27,9 @@ sudo make install
 
 ## Modes
 
+- dmenu - Only accessibly by using `-d` or `--dmenu`
+  - Reads from stdin and outputs selection to stdout
+  - Will not run with any other modes since there may be unexpected behavior
 - drun - Run from installed desktop applications
 - run - Run binary from PATH
 - i3wm - Window switcher for i3wm/sway
