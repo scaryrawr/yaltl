@@ -11,6 +11,7 @@ namespace tofi
 {
     bool spawn(const std::string &full_command)
     {
+        // Fork first child to start a new session
         pid_t pid{fork()};
         if (0 == pid)
         {
@@ -19,12 +20,14 @@ namespace tofi
                 exit(errno);
             }
 
+            // Try getting a new session id.
             pid = setsid();
             if (pid < 0)
             {
                 exit(errno);
             }
 
+            // Fork second child who shall live a very long life
             pid = fork();
             if (0 == pid)
             {
@@ -35,9 +38,11 @@ namespace tofi
                     return str.data();
                 });
 
+                // command should be the first argument in argv, otherwise certain apps won't run correctly
                 execvp(argv[0], argv.data());
             }
 
+            // Exit success or failure for the first child.
             exit(pid > 0 ? 0 : errno);
         }
 
@@ -49,6 +54,7 @@ namespace tofi
         int stat{};
         waitpid(pid, &stat, 0);
 
+        // Oddly, even if we're "successful" here, we don't actually know what happened to the child we care about
         return WIFEXITED(stat) && 0 == WEXITSTATUS(stat);
     }
 } // namespace tofi

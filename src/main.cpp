@@ -117,6 +117,7 @@ int main(int argc, char **argv)
 
 	tofi::Modes modes;
 
+	// If we're in dmenu mode, other modes might break, so... just dmenu
 	if (options.dmenu)
 	{
 		modes.emplace_back(std::make_unique<tofi::modes::dmenu>());
@@ -149,9 +150,9 @@ int main(int argc, char **argv)
 	}
 
 	modes.erase(std::remove(std::begin(modes), std::end(modes), nullptr), std::end(modes));
-
 	if (modes.empty())
 	{
+		// We don't have any modes, so show user help.
 		help();
 	}
 

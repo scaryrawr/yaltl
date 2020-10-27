@@ -19,6 +19,13 @@ namespace tofi
 
         namespace tree
         {
+            /**
+             * @brief Check if the container is to be ignored
+             * 
+             * @param con The container to check
+             * @return true - Ignore it
+             * @return false - Don't ignore it
+             */
             static bool ignore_listed(con_t con)
             {
                 if (!con)
@@ -36,6 +43,13 @@ namespace tofi
                 });
             }
 
+            /**
+             * @brief Gets all windows from the tree
+             * 
+             * @param con The current spot in the tree
+             * @param wins [Out] the windows collected
+             * @param self An identifier for self to ignore
+             */
             static void windows(con_t con, std::vector<con_t> &wins, const std::string &self)
             {
                 if (!con)
@@ -43,8 +57,8 @@ namespace tofi
                     return;
                 }
 
-                const bool isTofi{(con->app_id.value_or(con->window_properties.instance) == self)};
-                if (!isTofi && !ignore_listed(con) && con->nodes.empty() && con->floating_nodes.empty() && (con->type == "con" || con->type == "floating_con"))
+                const bool isSelf{(con->app_id.value_or(con->window_properties.instance) == self)};
+                if (!isSelf && !ignore_listed(con) && con->nodes.empty() && con->floating_nodes.empty() && (con->type == "con" || con->type == "floating_con"))
                 {
                     wins.push_back(con);
                 }
@@ -60,6 +74,13 @@ namespace tofi
                 }
             }
 
+            /**
+             * @brief Get all the windows in the tree
+             * 
+             * @param tree the tree
+             * @param self Identifier for self to avoid
+             * @return std::vector<con_t> 
+             */
             static std::vector<con_t> windows(con_t tree, const std::string &self)
             {
                 std::vector<con_t> wins;
@@ -71,6 +92,12 @@ namespace tofi
 
         namespace commands
         {
+            /**
+             * @brief Builds the command to switch to a workspace
+             * 
+             * @param name Workspace name to switch to
+             * @return std::string The command to run to switch to the workspace
+             */
             std::string switch_to_workspace(const std::string &name)
             {
                 std::ostringstream command;
@@ -79,12 +106,24 @@ namespace tofi
                 return command.str();
             }
 
+            /**
+             * @brief Get the instance string since it's different between sway and i3
+             * 
+             * @return const char* 
+             */
             const char *get_instance_string()
             {
                 static const char *instance{std::string(std::getenv("I3SOCK")).find("sway") != std::string::npos ? APP_ID : INSTANCE_ID};
                 return instance;
             }
 
+            /**
+             * @brief Gets the command to move a window using instance/app_id
+             * 
+             * @param window_id The window to move
+             * @param workspace The workspace to move to
+             * @return std::string
+             */
             std::string move_instance(const std::string &window_id, const std::string &workspace)
             {
                 std::ostringstream command;
@@ -93,6 +132,12 @@ namespace tofi
                 return command.str();
             }
 
+            /**
+             * @brief Gets the command to focus on a window using instance/app_id
+             * 
+             * @param window_id The window to focus
+             * @return std::string 
+             */
             std::string focus_instance(const std::string &window_id)
             {
                 std::ostringstream command;
@@ -101,6 +146,12 @@ namespace tofi
                 return command.str();
             }
 
+            /**
+             * @brief Gets a command to focus on a container
+             * 
+             * @param con The container to focus on
+             * @return std::string 
+             */
             std::string focus_window(const i3ipc::container_t &con)
             {
                 std::ostringstream command;
@@ -112,11 +163,13 @@ namespace tofi
 
         i3wm::i3wm(std::string &&self_id) : m_self_id(std::move(self_id))
         {
+            // i3ipc will output to stdout or stderr, so make sure to clear it when not debugging issues.
             i3ipc::g_logging_outs.clear();
         }
 
         Results i3wm::results(const std::wstring &search)
         {
+            // Always query for active windows since it can change as we go
             m_active = tree::windows(m_conn.get_tree(), m_self_id);
 
             std::vector<WindowSearch> windows;
@@ -125,6 +178,8 @@ namespace tofi
                 std::wstring name{string::converter.from_bytes(con->name)};
                 return WindowSearch{string::fuzzy_find<wchar_t>(name, search), con};
             });
+
+            std::sort(std::begin(windows), std::end(windows));
 
             windows.erase(std::remove_if(std::begin(windows), std::end(windows), [&search](const WindowSearch &win) {
                               return !win.match.has_value();
@@ -140,6 +195,11 @@ namespace tofi
             return results;
         }
 
+        /**
+         * @brief Move to window that may be of interest
+         * 
+         * @param selected The window to check out
+         */
         void i3wm::preview(const Result &selected)
         {
             auto con{static_cast<const i3ipc::container_t *>(selected.context)};
@@ -148,11 +208,18 @@ namespace tofi
                 return;
             }
 
+            // Fancy focus dance so we can have tofi always be on the active monitor but maintain focus
             m_conn.send_command(commands::switch_to_workspace(con->workspace.value()));
             m_conn.send_command(commands::move_instance(m_self_id, con->workspace.value()));
             m_conn.send_command(commands::focus_instance(m_self_id));
         }
 
+        /**
+         * @brief Focus the desired window
+         * 
+         * @param result The window to focus
+         * @return PostExec 
+         */
         PostExec i3wm::execute(const Result &result)
         {
             auto con{static_cast<const i3ipc::container_t *>(result.context)};

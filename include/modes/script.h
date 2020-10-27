@@ -11,6 +11,10 @@ namespace tofi
 {
     namespace modes
     {
+        /**
+         * @brief Loads a script and will recall script with selected output until no output is returned.
+         * 
+         */
         class script : public Mode
         {
         public:

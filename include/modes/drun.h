@@ -9,6 +9,10 @@ namespace tofi
 {
     namespace modes
     {
+        /**
+         * @brief Loads applications installed on desktop and helps user search and launch
+         * 
+         */
         class drun : public Mode
         {
         public:

@@ -8,6 +8,10 @@ namespace tofi
 {
     namespace modes
     {
+        /**
+         * @brief Uses i3ipc to switch between active windows in swaywm/i3wm.
+         * 
+         */
         class i3wm : public Mode
         {
             using con_t = std::shared_ptr<i3ipc::container_t>;

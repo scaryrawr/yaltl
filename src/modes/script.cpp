@@ -30,6 +30,7 @@ namespace tofi
 
         Results script::results(const std::wstring &search)
         {
+            // We run the script before the user may even come to script mode
             if (!m_results.has_value())
             {
                 m_results.emplace(m_loader.get());
@@ -41,12 +42,12 @@ namespace tofi
                 return fuzzy_string{string::fuzzy_find<wchar_t>(disp, search), disp.c_str()};
             });
 
+            std::sort(std::begin(fuzzy), std::end(fuzzy));
+
             fuzzy.erase(std::remove_if(std::begin(fuzzy), std::end(fuzzy), [](const fuzzy_string fuz) {
                             return !fuz.match.has_value();
                         }),
                         std::end(fuzzy));
-
-            std::sort(std::begin(fuzzy), std::end(fuzzy));
 
             Results results;
             results.reserve(fuzzy.size());
@@ -59,11 +60,13 @@ namespace tofi
 
         PostExec script::execute(const Result &result)
         {
+            // Build the command to run to see if the script keeps going or has exited nicely
             std::ostringstream cmd;
             cmd << m_script << " " << string::converter.to_bytes(static_cast<const wchar_t *>(result.context));
 
             // Don't load async since user since user is interacting with us anyways
             m_results.emplace(popen<wchar_t>(cmd.str()));
+
             return m_results.value().empty() ? PostExec::CloseSuccess : PostExec::StayOpen;
         }
     } // namespace modes

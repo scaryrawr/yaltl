@@ -27,8 +27,16 @@ namespace tofi
     };
 
     using unique_file = std::unique_ptr<FILE, fclose>;
+
     using unique_pfile = std::unique_ptr<FILE, pclose>;
 
+    /**
+     * @brief Reads all output from a command
+     * 
+     * @tparam CharT wide or regular char to return results as
+     * @param command The command to run with popen
+     * @return std::vector<std::basic_string<CharT>> Collection of lines that were outputted by the command
+     */
     template <class CharT>
     std::vector<std::basic_string<CharT>> popen(const std::string &command)
     {

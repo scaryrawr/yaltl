@@ -11,6 +11,10 @@ namespace tofi
 {
     namespace modes
     {
+        /**
+         * @brief Finds binaries on path for user to search through and launch possibly with parameters.
+         * 
+         */
         class run : public Mode
         {
         public:

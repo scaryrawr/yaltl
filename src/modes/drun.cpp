@@ -27,68 +27,51 @@ namespace tofi
         {
         }
 
-        PostExec drun::execute(const Result &result)
-        {
-            auto info{static_cast<const Gio::AppInfo *>(result.context)};
-            std::string full_command{info->get_commandline()};
-
-            // Remove special placeholders for AppInfo entry
-            string::insensitive::erase_all<char>(full_command, "%u");
-            string::insensitive::erase_all<char>(full_command, "%f");
-
-            return spawn(full_command) ? PostExec::CloseSuccess : PostExec::CloseFailure;
-        }
-
         Results drun::results(const std::wstring &search)
         {
+            // Get results from launch, be willing to wait
             if (!m_apps.has_value())
             {
                 m_apps.emplace(std::move(m_apps.value_or(m_load.get())));
             }
 
+            // Get fuzzy factors
             std::vector<AppSearch> results;
+            results.reserve(m_apps.value().size());
             std::transform(std::begin(m_apps.value()), std::end(m_apps.value()), std::back_inserter(results), [&search](AppInfo appinfo) {
                 if (!appinfo->should_show())
                 {
                     return AppSearch{std::nullopt, appinfo};
                 }
 
-                std::vector<std::wstring> fields;
-                fields.emplace_back(string::converter.from_bytes(appinfo->get_name()));
-                fields.emplace_back(string::converter.from_bytes(appinfo->get_display_name()));
-                fields.emplace_back(string::converter.from_bytes(appinfo->get_executable()));
+                // Collections of possible strings from the app information to use for fuzzy factors
+                std::array<std::wstring, 4> fields{{
+                    string::converter.from_bytes(appinfo->get_name()),
+                    string::converter.from_bytes(appinfo->get_display_name()),
+                    string::converter.from_bytes(appinfo->get_executable()),
+                    string::converter.from_bytes(commands::parse(appinfo->get_commandline()).path.filename()),
+                }};
 
-                Command command{commands::parse(appinfo->get_commandline())};
-                fields.emplace_back(string::converter.from_bytes(command.path.filename()));
-
+                // Get all the fuzzy factors
                 std::vector<std::optional<std::wstring>> matches;
+                matches.reserve(fields.size());
                 std::transform(std::begin(fields), std::end(fields), std::back_inserter(matches), [&search](const std::wstring &field) {
                     return string::fuzzy_find<wchar_t>(field, search);
                 });
 
-                matches.erase(std::remove_if(std::begin(matches), std::end(matches), [](auto &val) {
-                                  return !val.has_value();
-                              }),
-                              std::end(matches));
+                std::sort(std::begin(matches), std::end(matches));
 
-                std::sort(std::begin(matches), std::end(matches), [](auto &lhs, auto &rhs) {
-                    return lhs.value().length() < rhs.value().length();
-                });
-
-                if (matches.empty())
-                {
-                    return AppSearch{std::nullopt, appinfo};
-                }
-
+                // Only use the best fuzzy factor
                 return AppSearch{std::move(matches[0]), appinfo};
             });
 
+            std::sort(std::begin(results), std::end(results));
+
+            // Get rid of anything that didn't have a fuzzy factor
             results.erase(std::remove_if(std::begin(results), std::end(results), [](const AppSearch &res) {
                               return !res.match.has_value();
                           }),
                           std::end(results));
-
-            std::sort(std::begin(results), std::end(results));
 
             Results retval;
             retval.reserve(results.size());
@@ -108,6 +91,18 @@ namespace tofi
             });
 
             return retval;
+        }
+
+        PostExec drun::execute(const Result &result)
+        {
+            auto info{static_cast<const Gio::AppInfo *>(result.context)};
+            std::string full_command{info->get_commandline()};
+
+            // Remove special placeholders for AppInfo entry
+            string::insensitive::erase_all<char>(full_command, "%u");
+            string::insensitive::erase_all<char>(full_command, "%f");
+
+            return spawn(full_command) ? PostExec::CloseSuccess : PostExec::CloseFailure;
         }
     } // namespace modes
 

@@ -19,13 +19,26 @@ namespace tofi
 
     using Results = std::vector<Result>;
 
+    /**
+     * @brief What should happen after the mode executed
+     * 
+     */
     enum class PostExec
     {
+        //! Close with successful exit
         CloseSuccess,
+
+        //! Close with a failure code
         CloseFailure,
+
+        //! Stay open to do more
         StayOpen,
     };
 
+    /**
+     * @brief Interface of functions a mode must implement to be supported by tofi.
+     * 
+     */
     class Mode
     {
     public:
@@ -38,7 +51,7 @@ namespace tofi
          * @brief Gets the results to display
          * 
          * @param search The current text in the input box
-         * @return Results The results for the inpux box
+         * @return Results The results for the input box
          */
         virtual Results results(const std::wstring &search) = 0;
 

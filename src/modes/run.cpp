@@ -15,6 +15,11 @@ namespace tofi
 
     namespace modes
     {
+        /**
+         * @brief Gets all the binaries from $PATH
+         * 
+         * @return std::future<std::vector<std::wstring>> 
+         */
         std::future<std::vector<std::wstring>> load()
         {
             return std::async(std::launch::async, []() -> std::vector<std::wstring> {
@@ -44,6 +49,8 @@ namespace tofi
                     });
                 }
 
+                // It's possible for a binary to be in things like /usr/bin and /usr/local/bin, and we're not in the business
+                // of handling that, since it'll be handled for us when we go to spawn the command
                 std::sort(std::begin(binaries), std::end(binaries));
                 binaries.erase(std::unique(std::begin(binaries), std::end(binaries)), std::end(binaries));
                 binaries.erase(std::remove_if(std::begin(binaries), std::end(binaries), [](const std::wstring &bin) {
@@ -60,6 +67,7 @@ namespace tofi
 
         Results run::results(const std::wstring &search)
         {
+            // Wait to finish loaded if needed
             if (!m_binaries.has_value())
             {
                 m_binaries.emplace(m_loader.get());
@@ -69,18 +77,21 @@ namespace tofi
             binaries.reserve(m_binaries.value().size());
             std::transform(std::begin(m_binaries.value()), std::end(m_binaries.value()), std::back_inserter(binaries), [&search](const std::wstring &bin) {
                 std::vector<std::wstring_view> parts;
+
+                // This is to support the user typing arguments to pass to the binary being ran
+                // such as code-insiders ~/Path/To/Repository
                 string::split<wchar_t, std::wstring_view>(search, L" ", std::back_inserter(parts));
 
                 std::wstring binstr{bin};
                 return BinSearch{string::fuzzy_find<wchar_t>(binstr, parts.empty() ? L"" : parts[0]), bin.c_str()};
             });
 
+            std::sort(std::begin(binaries), std::end(binaries));
+
             binaries.erase(std::remove_if(std::begin(binaries), std::end(binaries), [](const BinSearch &res) {
                                return !res.match.has_value();
                            }),
                            std::end(binaries));
-
-            std::sort(std::begin(binaries), std::end(binaries));
 
             Results results;
             results.reserve(binaries.size());
@@ -93,17 +104,18 @@ namespace tofi
 
         PostExec run::execute(const Result &result)
         {
-            // User might have typed args to pass to the command as well
+            std::ostringstream spawnargs;
+
+            // We don't trust the command that the user is typed since we have fuzzy find.
             const wchar_t *bin{static_cast<const wchar_t *>(result.context)};
+            spawnargs << string::converter.to_bytes(bin) << " ";
+
+            // User might have typed args to pass to the command as well
             std::string command = string::converter.to_bytes(result.display.c_str());
             std::vector<std::string_view> parts;
             string::split<char, std::string_view>(command, " ", std::back_inserter(parts));
 
-            std::ostringstream spawnargs;
-
-            // We may have showed early results, so use what was from the list
-            spawnargs << string::converter.to_bytes(bin) << " ";
-
+            // Skip the first part since it's the "incorrect" binary name
             std::copy(std::begin(parts) + 1, std::end(parts), std::ostream_iterator<std::string_view>(spawnargs, " "));
 
             return spawn(spawnargs.str()) ? PostExec::CloseSuccess : PostExec::CloseFailure;
