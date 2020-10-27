@@ -59,6 +59,7 @@ namespace tofi
                     return string::fuzzy_find<wchar_t>(field, search);
                 });
 
+                matches.erase(std::remove(std::begin(matches), std::end(matches), std::nullopt), std::end(matches));
                 std::sort(std::begin(matches), std::end(matches));
 
                 // Only use the best fuzzy factor
