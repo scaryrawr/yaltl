@@ -1,6 +1,5 @@
 #include "modes/i3wm.h"
 
-#include "utils/fuzzyresult.h"
 #include "utils/string.h"
 
 #include <i3ipc++/log.hpp>
@@ -15,7 +14,6 @@ namespace tofi
     namespace modes
     {
         using con_t = std::shared_ptr<i3ipc::container_t>;
-        using WindowSearch = FuzzyResult<con_t, wchar_t>;
 
         namespace tree
         {
@@ -167,32 +165,29 @@ namespace tofi
             i3ipc::g_logging_outs.clear();
         }
 
-        Results i3wm::results(const std::wstring &search)
+        struct ContainerResult : public Entry
+        {
+            ContainerResult(std::wstring &&name) : Entry(std::move(name))
+            {
+            }
+
+            con_t container;
+        };
+
+        const Entries &i3wm::results()
         {
             // Always query for active windows since it can change as we go
-            m_active = tree::windows(m_conn.get_tree(), m_self_id);
+            std::vector<con_t> tree{tree::windows(m_conn.get_tree(), m_self_id)};
+            m_active.resize(tree.size());
 
-            std::vector<WindowSearch> windows;
-            windows.reserve(m_active.size());
-            std::transform(std::begin(m_active), std::end(m_active), std::back_inserter(windows), [&search](con_t con) {
-                std::wstring name{string::converter.from_bytes(con->name)};
-                return WindowSearch{string::fuzzy_find<wchar_t>(name, search), con};
+            std::transform(std::begin(tree), std::end(tree), std::begin(m_active), [](con_t &con) {
+                auto result{std::make_shared<ContainerResult>(string::converter.from_bytes(con->name))};
+                result->container = con;
+
+                return result;
             });
 
-            std::sort(std::begin(windows), std::end(windows));
-
-            windows.erase(std::remove_if(std::begin(windows), std::end(windows), [&search](const WindowSearch &win) {
-                              return !win.match.has_value();
-                          }),
-                          std::end(windows));
-
-            Results results;
-            results.reserve(windows.size());
-            std::transform(std::begin(windows), std::end(windows), std::back_inserter(results), [](const WindowSearch &win) {
-                return Result{string::converter.from_bytes(win.value->name), win.value.get()};
-            });
-
-            return results;
+            return m_active;
         }
 
         /**
@@ -200,9 +195,10 @@ namespace tofi
          * 
          * @param selected The window to check out
          */
-        void i3wm::preview(const Result &selected)
+        void i3wm::preview(const Entry &selected)
         {
-            auto con{static_cast<const i3ipc::container_t *>(selected.context)};
+            auto res = reinterpret_cast<const ContainerResult *>(&selected);
+            auto con{res->container};
             if (!con->workspace.has_value())
             {
                 return;
@@ -220,13 +216,10 @@ namespace tofi
          * @param result The window to focus
          * @return PostExec 
          */
-        PostExec i3wm::execute(const Result &result)
+        PostExec i3wm::execute(const Entry &result, const std::wstring &)
         {
-            auto con{static_cast<const i3ipc::container_t *>(result.context)};
-            if (!con)
-            {
-                return PostExec::CloseFailure;
-            }
+            auto res = reinterpret_cast<const ContainerResult *>(&result);
+            auto con{res->container};
 
             return m_conn.send_command(commands::focus_window(*con)) ? PostExec::CloseSuccess : PostExec::CloseFailure;
         }

@@ -4,8 +4,10 @@
 #include <ftxui/component/container.hpp>
 #include <ftxui/component/input.hpp>
 #include <ftxui/component/menu.hpp>
+#include <regex>
 
 #include "mode.h"
+#include "utils/fuzzyresult.h"
 
 namespace tofi
 {
@@ -34,8 +36,9 @@ namespace tofi
         ftxui::Menu m_results;
         int32_t m_mode{};
         Modes m_modes;
-        Results m_activeResults;
+        std::vector<FuzzyResult> m_activeResults;
         std::optional<std::wstring> m_previousSearch;
         std::optional<int32_t> m_previousMode;
+        std::wregex m_regex;
     };
 } // namespace tofi

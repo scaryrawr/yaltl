@@ -25,13 +25,13 @@ namespace tofi
                 return L"drun";
             }
 
-            Results results(const std::wstring &search) override;
+            const Entries &results() override;
 
-            PostExec execute(const Result &result) override;
+            PostExec execute(const Entry &result, const std::wstring &text) override;
 
         private:
-            std::future<Glib::ListHandle<Glib::RefPtr<Gio::AppInfo>>> m_load;
-            std::optional<Glib::ListHandle<Glib::RefPtr<Gio::AppInfo>>> m_apps;
+            Entries m_entries;
+            std::future<Entries> m_loading;
         };
     } //namespace modes
 } // namespace tofi

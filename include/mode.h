@@ -6,18 +6,20 @@
 
 namespace tofi
 {
-    struct Result
+    struct Entry
     {
+        explicit Entry(std::wstring &&disp) : display(std::move(disp))
+        {
+        }
+
         //! The string to display in the results list when coming from the mode, or the user input when being sent to the mode
         std::wstring display;
 
-        //! The context for the result for the mode if the result is selected or executed
-        const void *context{};
-
-        auto operator<=>(const Result &) const = default;
+        //! Search criteria for finding matches, if not set, display will be used
+        std::optional<std::vector<std::wstring>> criteria;
     };
 
-    using Results = std::vector<Result>;
+    using Entries = std::vector<std::shared_ptr<Entry>>;
 
     /**
      * @brief What should happen after the mode executed
@@ -50,10 +52,9 @@ namespace tofi
         /**
          * @brief Gets the results to display
          * 
-         * @param search The current text in the input box
-         * @return Results The results for the input box
+         * @return Entries The results for the input box
          */
-        virtual Results results(const std::wstring &search) = 0;
+        virtual const Entries &results() = 0;
 
         /**
          * @brief Asks the mode to preview the selected result
@@ -61,15 +62,21 @@ namespace tofi
          * @param selected The selected result to preview
          * @return The preview action to wait on if any
          */
-        virtual void preview(const Result &selected){};
+        virtual void preview(const Entry &selected){};
+
+        virtual bool first_word_only() const
+        {
+            return false;
+        }
 
         /**
          * @brief Asks the mode to execute the selected result
          * 
          * @param result The result to execute
+         * @param text The text box contents
          * @return The result of the execution
          */
-        virtual PostExec execute(const Result &result) = 0;
+        virtual PostExec execute(const Entry &result, const std::wstring &text) = 0;
     };
 
     using Modes = std::vector<std::unique_ptr<Mode>>;

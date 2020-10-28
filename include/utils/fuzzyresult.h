@@ -1,31 +1,23 @@
 #pragma once
 
+#include "mode.h"
+
+#include <memory>
 #include <optional>
 #include <string>
 #include <compare>
 
 namespace tofi
 {
-    /**
-     * @brief Wrapper around some type that can has a fuzzy search result
-     * 
-     * @tparam Value The value type tied to the fuzzy search
-     * @tparam CharT The char-type to support wide and regular characters
-     */
-    template <class Value, class CharT>
     struct FuzzyResult
     {
+        std::shared_ptr<Entry> result;
+
         /**
          * @brief The match result (can be nullopt that no matches were found).
          * 
          */
-        std::optional<std::basic_string<CharT>> match;
-
-        /**
-         * @brief The object tied to the match results
-         * 
-         */
-        Value value{};
+        std::optional<std::wstring_view> match;
 
         /**
          * @brief Compares fuzzy match results

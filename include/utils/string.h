@@ -32,6 +32,47 @@ namespace tofi
             return L".*";
         }
 
+        template <class CharT>
+        struct is_space
+        {
+            using value_type = CharT;
+            bool operator()(value_type ch)
+            {
+                if constexpr (sizeof(CharT) == sizeof(ch))
+                {
+                    return std::isspace(ch);
+                }
+
+                return std::iswspace(ch);
+            }
+        };
+
+        template <class Operator>
+        struct negate
+        {
+            using value_type = typename Operator::value_type;
+
+            negate() : op{}
+            {
+            }
+
+            bool operator()(value_type value)
+            {
+                return !op(value);
+            }
+
+        private:
+            Operator op;
+        };
+
+        template <class CharT>
+        auto build_regex(const std::basic_string_view<CharT> &search)
+        {
+            std::basic_ostringstream<CharT> builder;
+            std::copy_if(std::begin(search), std::end(search), std::ostream_iterator<CharT, CharT>(builder, regex_delim<CharT>()), negate<is_space<CharT>>());
+            return std::basic_regex<CharT>{builder.str(), std::regex_constants::icase};
+        }
+
         /**
          * @brief Does a case insensitive "fuzzy" search.
          * 
@@ -40,33 +81,22 @@ namespace tofi
          * @param inner The inner text being searched for.
          * @return std::optional<std::basic_string<CharT>> The fuzz found.
          */
-        template <class CharT>
-        std::optional<std::basic_string<CharT>> fuzzy_find(std::basic_string_view<CharT> outer, std::basic_string_view<CharT> inner)
+        template <class CharT, class RegexItr = std::regex_iterator<typename std::basic_string_view<CharT>::const_iterator>, class Regex = std::basic_regex<CharT>>
+        std::optional<std::basic_string_view<CharT>> fuzzy_find(std::basic_string_view<CharT> outer, const Regex &search)
         {
-            using RegexItr = std::regex_iterator<typename std::basic_string_view<CharT>::const_iterator>;
-            using Regex = std::basic_regex<CharT>;
 
-            std::basic_ostringstream<CharT> builder;
-            std::copy(std::begin(inner), std::end(inner), std::ostream_iterator<CharT, CharT>(builder, regex_delim<CharT>()));
-            Regex regex{builder.str(), std::regex_constants::icase};
-            RegexItr itr{std::begin(outer), std::end(outer), regex};
+            RegexItr itr{std::begin(outer), std::end(outer), search};
             RegexItr end{};
 
-            std::vector<std::basic_string<CharT>> results;
-            std::transform(itr, end, std::back_inserter(results), [](const std::match_results<const CharT *> &result) {
-                return result.str();
+            std::optional<std::basic_string_view<CharT>> result;
+            std::for_each(itr, end, [&result, &outer](const std::match_results<const CharT *> &res) {
+                if (!result.has_value() || res.length() < result.value().length())
+                {
+                    result = outer.substr(res.position(), res.length());
+                }
             });
 
-            if (results.empty())
-            {
-                return std::nullopt;
-            }
-
-            std::sort(std::begin(results), std::end(results), [](const std::basic_string<CharT> &lhs, const std::basic_string<CharT> &rhs) {
-                return lhs.length() < rhs.length();
-            });
-
-            return results[0];
+            return result;
         }
 
         /**
@@ -165,39 +195,6 @@ namespace tofi
                 {
                     str.erase(position, other.length());
                 }
-            }
-
-            /**
-             * @brief Checks if one string contains another
-             * 
-             * @tparam CharT The string character type
-             * @param outer The outer string to search inside of
-             * @param inner The inner string to search for
-             * @param locale The locale
-             * @return true The inner string was found in the outer
-             * @return false The inner string was not found in the other
-             */
-            template <class CharT>
-            bool contains(std::basic_string_view<CharT> outer, std::basic_string_view<CharT> inner, const std::locale &locale = std::locale())
-            {
-                return find<CharT>(outer, inner, 0, locale) != std::basic_string_view<CharT>::npos;
-            }
-
-            /**
-             * @brief Checks if one string is a permutation of the other
-             * 
-             * @tparam CharT The character type
-             * @param outer The first string
-             * @param inner The second string
-             * @param locale The locale
-             * @return true - They are permutations of each other
-             * @return false - They are not permutations of each other
-             */
-            template <class CharT>
-            bool permutation(std::basic_string_view<CharT> outer, std::basic_string_view<CharT> inner, const std::locale &locale = std::locale())
-            {
-                return std::is_permutation(std::begin(outer), std::end(outer), std::begin(inner), std::end(inner), equals<CharT>{locale}) ||
-                       (outer.size() > inner.size() && std::is_permutation(std::begin(outer), std::begin(outer) + inner.size(), std::begin(inner), std::end(inner), equals<CharT>{locale}));
             }
         } // namespace insensitive
     }     // namespace string

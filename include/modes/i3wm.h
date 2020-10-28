@@ -24,15 +24,15 @@ namespace tofi
                 return L"windows";
             }
 
-            Results results(const std::wstring &search) override;
+            const Entries &results() override;
 
-            void preview(const Result &selected) override;
+            void preview(const Entry &selected) override;
 
-            PostExec execute(const Result &result) override;
+            PostExec execute(const Entry &result, const std::wstring &) override;
 
         private:
             i3ipc::connection m_conn;
-            std::vector<con_t> m_active;
+            Entries m_active;
             std::string m_self_id;
         };
     } // namespace modes

@@ -21,7 +21,7 @@ namespace tofi
      * @param command The command to run with popen
      * @return std::vector<std::basic_string<CharT>> Collection of lines that were outputted by the command
      */
-    template <class CharT>
+    template <class CharT = wchar_t>
     std::vector<std::basic_string<CharT>> popen(const std::string &command)
     {
         unique_pfile file{::popen(command.c_str(), "r")};

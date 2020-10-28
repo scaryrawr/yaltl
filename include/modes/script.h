@@ -25,15 +25,15 @@ namespace tofi
                 return m_name;
             }
 
-            Results results(const std::wstring &search) override;
-            PostExec execute(const Result &result) override;
+            const Entries &results() override;
+
+            PostExec execute(const Entry &result, const std::wstring &) override;
 
         private:
             std::wstring m_name;
             std::string m_script;
-            std::future<std::vector<std::wstring>> m_loader;
-            std::optional<std::vector<std::wstring>> m_results;
+            std::future<Entries> m_loader;
+            Entries m_results;
         };
     } // namespace modes
-
 } // namespace tofi

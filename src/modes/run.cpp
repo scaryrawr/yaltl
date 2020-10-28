@@ -1,6 +1,5 @@
 #include "modes/run.h"
 
-#include "utils/fuzzyresult.h"
 #include "utils/spawn.h"
 #include "utils/string.h"
 
@@ -11,8 +10,6 @@
 
 namespace tofi
 {
-    using BinSearch = FuzzyResult<const wchar_t *, wchar_t>;
-
     namespace modes
     {
         /**
@@ -20,9 +17,9 @@ namespace tofi
          * 
          * @return std::future<std::vector<std::wstring>> 
          */
-        std::future<std::vector<std::wstring>> load()
+        std::future<Entries> load()
         {
-            return std::async(std::launch::async, []() -> std::vector<std::wstring> {
+            return std::async(std::launch::async, []() -> Entries {
                 const char *path{std::getenv("PATH")};
 
                 // There is no path environment
@@ -57,7 +54,13 @@ namespace tofi
                                    return bin.starts_with(L'.') || bin.starts_with(L'[') || bin.empty();
                                }),
                                std::end(binaries));
-                return binaries;
+
+                Entries res(binaries.size());
+                std::transform(std::begin(binaries), std::end(binaries), std::begin(res), [](std::wstring &bin) {
+                    return std::make_shared<Entry>(std::move(bin));
+                });
+
+                return res;
             });
         }
 
@@ -65,53 +68,26 @@ namespace tofi
         {
         }
 
-        Results run::results(const std::wstring &search)
+        const Entries &run::results()
         {
             // Wait to finish loaded if needed
-            if (!m_binaries.has_value())
+            if (m_binaries.empty() && m_loader.valid())
             {
-                m_binaries.emplace(m_loader.get());
+                m_binaries = std::move(m_loader.get());
             }
 
-            std::vector<BinSearch> binaries;
-            binaries.reserve(m_binaries.value().size());
-            std::transform(std::begin(m_binaries.value()), std::end(m_binaries.value()), std::back_inserter(binaries), [&search](const std::wstring &bin) {
-                std::vector<std::wstring_view> parts;
-
-                // This is to support the user typing arguments to pass to the binary being ran
-                // such as code-insiders ~/Path/To/Repository
-                string::split<wchar_t, std::wstring_view>(search, L" ", std::back_inserter(parts));
-
-                std::wstring binstr{bin};
-                return BinSearch{string::fuzzy_find<wchar_t>(binstr, parts.empty() ? L"" : parts[0]), bin.c_str()};
-            });
-
-            std::sort(std::begin(binaries), std::end(binaries));
-
-            binaries.erase(std::remove_if(std::begin(binaries), std::end(binaries), [](const BinSearch &res) {
-                               return !res.match.has_value();
-                           }),
-                           std::end(binaries));
-
-            Results results;
-            results.reserve(binaries.size());
-            std::transform(std::begin(binaries), std::end(binaries), std::back_inserter(results), [](const BinSearch &bin) {
-                return Result{bin.value, bin.value};
-            });
-
-            return results;
+            return m_binaries;
         }
 
-        PostExec run::execute(const Result &result)
+        PostExec run::execute(const Entry &result, const std::wstring &text)
         {
             std::ostringstream spawnargs;
 
             // We don't trust the command that the user is typed since we have fuzzy find.
-            const wchar_t *bin{static_cast<const wchar_t *>(result.context)};
-            spawnargs << string::converter.to_bytes(bin) << " ";
+            spawnargs << string::converter.to_bytes(result.display) << " ";
 
             // User might have typed args to pass to the command as well
-            std::string command = string::converter.to_bytes(result.display.c_str());
+            std::string command = string::converter.to_bytes(text.c_str());
             std::vector<std::string_view> parts;
             string::split<char, std::string_view>(command, " ", std::back_inserter(parts));
 

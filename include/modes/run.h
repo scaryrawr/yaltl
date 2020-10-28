@@ -25,13 +25,18 @@ namespace tofi
                 return L"run";
             }
 
-            Results results(const std::wstring &search) override;
+            const Entries &results() override;
 
-            PostExec execute(const Result &result) override;
+            bool first_word_only() const override
+            {
+                return true;
+            }
+
+            PostExec execute(const Entry &result, const std::wstring &text) override;
 
         private:
-            std::future<std::vector<std::wstring>> m_loader;
-            std::optional<std::vector<std::wstring>> m_binaries;
+            std::future<Entries> m_loader;
+            Entries m_binaries;
         };
     } // namespace modes
 

@@ -23,9 +23,12 @@ namespace tofi
                 return L"dmenu";
             }
 
-            Results results(const std::wstring &search) override;
+            const Entries &results() override
+            {
+                return m_entries;
+            }
 
-            PostExec execute(const Result &result) override;
+            PostExec execute(const Entry &result, const std::wstring &text) override;
 
         private:
             ///
@@ -33,13 +36,13 @@ namespace tofi
             ///
 
             //! The lines read from stdin
-            const std::vector<std::wstring> m_lines;
+            const Entries m_entries;
 
             //! The file descriptor to "stdout"
-            std::optional<int> m_fdout{};
+            std::optional<int> m_stdoutCopy{};
 
             //! The file descriptor to "stdin"
-            std::optional<int> m_fdin{};
+            std::optional<int> m_stdinCopy{};
 
             //! The file handle to tty-in
             unique_file m_ttyIn;
