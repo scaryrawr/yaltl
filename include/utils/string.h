@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <codecvt>
+#include <functional>
 #include <locale>
 #include <optional>
 #include <string>
@@ -33,43 +34,10 @@ namespace tofi
         }
 
         template <class CharT>
-        struct is_space
-        {
-            using value_type = CharT;
-            bool operator()(value_type ch)
-            {
-                if constexpr (sizeof(CharT) == sizeof(ch))
-                {
-                    return std::isspace(ch);
-                }
-
-                return std::iswspace(ch);
-            }
-        };
-
-        template <class Operator>
-        struct negate
-        {
-            using value_type = typename Operator::value_type;
-
-            negate() : op{}
-            {
-            }
-
-            bool operator()(value_type value)
-            {
-                return !op(value);
-            }
-
-        private:
-            Operator op;
-        };
-
-        template <class CharT>
         auto build_regex(const std::basic_string_view<CharT> &search)
         {
             std::basic_ostringstream<CharT> builder;
-            std::copy_if(std::begin(search), std::end(search), std::ostream_iterator<CharT, CharT>(builder, regex_delim<CharT>()), negate<is_space<CharT>>());
+            std::copy_if(std::begin(search), std::end(search), std::ostream_iterator<CharT, CharT>(builder, regex_delim<CharT>()), std::not_fn(std::bind(std::isspace<CharT>, std::placeholders::_1, std::locale())));
             return std::basic_regex<CharT>{builder.str(), std::regex_constants::icase};
         }
 
