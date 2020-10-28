@@ -191,15 +191,16 @@ namespace tofi
                                       return !fuzzy.match.has_value();
                                   }),
                                   std::end(m_activeResults));
+
+            m_results.entries.resize(m_activeResults.size());
+            std::transform(std::begin(m_activeResults), std::end(m_activeResults), std::begin(m_results.entries), [](const FuzzyResult &result) {
+                return result.result->display;
+            });
         }
 
         m_previousSearch = realSearch;
         m_previousMode = m_mode;
 
-        m_results.entries.resize(m_activeResults.size());
-        std::transform(std::begin(m_activeResults), std::end(m_activeResults), std::begin(m_results.entries), [](const FuzzyResult &result) {
-            return result.result->display;
-        });
 
         if (m_results.selected >= m_results.entries.size())
         {
