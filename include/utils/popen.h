@@ -8,6 +8,7 @@
 #include <vector>
 
 #include <mtl/memory.hpp>
+#include <mtl/string.hpp>
 
 namespace tofi
 {
@@ -40,14 +41,17 @@ namespace tofi
                 contents << buffer;
             }
 
+            const CharT *delim{};
             if constexpr (sizeof(CharT) == sizeof(char))
             {
-                string::split<CharT, std::basic_string<CharT>>(contents.str(), "\n", std::back_inserter(lines));
+                delim = "\n";
             }
             else
             {
-                string::split<CharT, std::basic_string<CharT>>(string::converter.from_bytes(contents.str()), L"\n", std::back_inserter(lines));
+                delim = L"\n";
             }
+
+            mtl::string::split<CharT, std::basic_string<CharT>>(string::converter.from_bytes(contents.str()), delim, std::back_inserter(lines));
 
             lines.erase(std::remove_if(std::begin(lines), std::end(lines), [](const std::basic_string<CharT> &line) {
                             return line.empty();

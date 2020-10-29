@@ -10,6 +10,7 @@
 #include <getopt.h>
 #include <giomm/init.h>
 #include <ftxui/component/screen_interactive.hpp>
+#include <mtl/string.hpp>
 
 #include <iostream>
 struct LaunchMode
@@ -87,13 +88,13 @@ LaunchOptions parse_args(int argc, char **argv)
 		case Option::modes:
 		{
 			std::vector<std::string_view> modes;
-			tofi::string::split<char, std::string_view>(optarg, ",", std::back_inserter(modes));
+			mtl::string::split(optarg, ",", std::back_inserter(modes));
 
 			launch.modes.reserve(modes.size());
 			std::transform(std::begin(modes), std::end(modes), std::back_inserter(launch.modes), [](std::string_view mode) {
 				std::vector<std::string_view> parts;
 				parts.reserve(2);
-				tofi::string::split<char, std::string_view>(mode, ":", std::back_inserter(parts));
+				mtl::string::split(mode, ":", std::back_inserter(parts));
 				return parts.size() == 1 ? LaunchMode{parts[0], std::nullopt} : LaunchMode{parts[0], parts[1]};
 			});
 			break;

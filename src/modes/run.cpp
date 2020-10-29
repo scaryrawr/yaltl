@@ -3,6 +3,8 @@
 #include "utils/spawn.h"
 #include "utils/string.h"
 
+#include <mtl/string.hpp>
+
 #include <cstdlib>
 #include <algorithm>
 #include <filesystem>
@@ -29,7 +31,7 @@ namespace tofi
                 }
 
                 std::vector<std::string_view> paths;
-                string::split<char, std::string_view>(path, ":", std::back_inserter(paths));
+                mtl::string::split(path, ":", std::back_inserter(paths));
 
                 std::vector<std::wstring> binaries;
 
@@ -89,7 +91,7 @@ namespace tofi
             // User might have typed args to pass to the command as well
             std::string command = string::converter.to_bytes(text.c_str());
             std::vector<std::string_view> parts;
-            string::split<char, std::string_view>(command, " ", std::back_inserter(parts));
+            mtl::string::split(command, " ", std::back_inserter(parts));
 
             // Skip the first part since it's the "incorrect" binary name
             std::copy(std::begin(parts) + 1, std::end(parts), std::ostream_iterator<std::string_view>(spawnargs, " "));

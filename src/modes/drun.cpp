@@ -4,6 +4,8 @@
 #include "utils/spawn.h"
 #include "utils/string.h"
 
+#include <mtl/string.hpp>
+
 #include <algorithm>
 #include <iostream>
 
@@ -84,8 +86,8 @@ namespace tofi
             std::string full_command{info->get_commandline()};
 
             // Remove special placeholders for AppInfo entry
-            string::insensitive::erase_all<char>(full_command, "%u");
-            string::insensitive::erase_all<char>(full_command, "%f");
+            mtl::string::ierase_all(full_command, "%u");
+            mtl::string::ierase_all(full_command, "%f");
 
             return spawn(full_command) ? PostExec::CloseSuccess : PostExec::CloseFailure;
         }

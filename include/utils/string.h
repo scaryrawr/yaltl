@@ -38,6 +38,7 @@ namespace tofi
         {
             std::basic_ostringstream<CharT> builder;
             std::copy_if(std::begin(search), std::end(search), std::ostream_iterator<CharT, CharT>(builder, regex_delim<CharT>()), std::not_fn(std::bind(std::isspace<CharT>, std::placeholders::_1, std::locale())));
+
             return std::basic_regex<CharT>{builder.str(), std::regex_constants::icase};
         }
 
@@ -66,104 +67,5 @@ namespace tofi
 
             return result;
         }
-
-        /**
-         * @brief Splits a string
-         * 
-         * @tparam CharT character type of strings
-         * @tparam OutType To return newly allocated strings, or views into the "split" string
-         * @tparam OutItr Output iterator type.
-         * @param str The string to split
-         * @param delim The delimiter to split on
-         * @param out Place to store output
-         * @return auto The output iterator position that's the end
-         */
-        template <class CharT, class OutType, class OutItr>
-        auto split(std::basic_string_view<CharT> str, std::basic_string_view<CharT> delim, OutItr out)
-        {
-            size_t position = 0;
-            size_t delim_len = delim.length();
-            for (auto pos{str.find(delim)}; pos != std::basic_string_view<CharT>::npos; pos = str.find(delim, position))
-            {
-                (*out++) = OutType(str.substr(position, pos - position));
-                position = pos + delim_len;
-            }
-
-            if (position < str.length())
-            {
-                (*out++) = OutType(str.substr(position, str.length() - position));
-            }
-
-            return out;
-        }
-
-        namespace insensitive
-        {
-            template <class CharT>
-            struct equals
-            {
-                equals(const std::locale &locale) : m_locale(locale)
-                {
-                }
-
-                bool operator()(CharT left, CharT right)
-                {
-                    return std::toupper(left, m_locale) == std::toupper(right, m_locale);
-                }
-
-            private:
-                const std::locale &m_locale;
-            };
-
-            template <class CharT>
-            struct less
-            {
-                less(const std::locale &locale) : m_locale(locale)
-                {
-                }
-
-                auto operator()(CharT left, CharT right)
-                {
-                    return std::toupper(left, m_locale) < std::toupper(right, m_locale);
-                }
-
-            private:
-                const std::locale &m_locale;
-            };
-
-            /**
-             * @brief Does a case insensitive "exact" match.
-             * 
-             * @tparam CharT The string character types
-             * @param str The outer string to search in
-             * @param other The string to search for
-             * @param startPosition The position to start the search at
-             * @param locale The string locale
-             * @return auto The position of the string or npos
-             */
-            template <class CharT>
-            auto find(std::basic_string_view<CharT> str, std::basic_string_view<CharT> other, size_t startPosition = 0, const std::locale &locale = std::locale())
-            {
-                auto itr = std::search(std::begin(str) + startPosition, std::end(str), std::begin(other), std::end(other), equals<CharT>{locale});
-                return itr == std::end(str) ? std::basic_string_view<CharT>::npos : itr - std::begin(str);
-            }
-
-            /**
-             * @brief Removes all occurrences of a specific string from another
-             * 
-             * @tparam CharT The string character type
-             * @param str The string to remove occurrences from
-             * @param other The occurrences to remove
-             * @param locale The string locale
-             */
-            template <class CharT>
-            void erase_all(std::basic_string<CharT> &str, std::basic_string_view<CharT> other, const std::locale &locale = std::locale())
-            {
-                for (auto position{find<CharT>(str, other, 0, locale)}; std::basic_string_view<CharT>::npos != position; position = find<CharT>(str, other, position, locale))
-                {
-                    str.erase(position, other.length());
-                }
-            }
-        } // namespace insensitive
-    }     // namespace string
+    } // namespace string
 } // namespace tofi
