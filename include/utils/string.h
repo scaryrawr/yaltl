@@ -56,16 +56,16 @@ namespace tofi
 
             RegexItr itr{std::begin(outer), std::end(outer), search};
             RegexItr end{};
+            auto resItr{std::min_element(itr, end, [](const auto &lhs, const auto &rhs) {
+                return lhs.length() < rhs.length();
+            })};
 
-            std::optional<std::basic_string_view<CharT>> result;
-            std::for_each(itr, end, [&result, &outer](const std::match_results<const CharT *> &res) {
-                if (!result.has_value() || res.length() < result.value().length())
-                {
-                    result = outer.substr(res.position(), res.length());
-                }
-            });
+            if (resItr != end)
+            {
+                return outer.substr(resItr->position(), resItr->length());
+            }
 
-            return result;
+            return std::nullopt;
         }
     } // namespace string
 } // namespace tofi
