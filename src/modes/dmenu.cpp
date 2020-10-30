@@ -2,6 +2,7 @@
 
 #include "utils/popen.h"
 
+#include <mtl/string.hpp>
 #include <unistd.h>
 #include <cstdio>
 #include <iostream>
@@ -17,11 +18,20 @@ namespace tofi
          */
         Entries load_stdin()
         {
-            Entries lines;
-            for (std::wstring tmp; std::getline(std::wcin, tmp);)
+            std::vector<char> buffer;
+            char buff[1024];
+            for (ssize_t size{read(STDIN_FILENO, buff, sizeof(buff))}; size > 0; size = read(STDIN_FILENO, buff, sizeof(buff)))
             {
-                lines.emplace_back(std::make_shared<Entry>(std::move(tmp)));
+                buffer.insert(std::end(buffer), buff, buff + size);
             }
+
+            std::vector<std::string_view> rawLines(std::count(std::begin(buffer), std::end(buffer), '\n') + 1);
+            mtl::string::split(buffer.data(), "\n", std::begin(rawLines));
+
+            Entries lines(rawLines.size());
+            std::transform(std::begin(rawLines), std::end(rawLines), std::begin(lines), [](std::string_view line) {
+                return std::make_shared<Entry>(string::converter.from_bytes(std::begin(line), std::end(line)));
+            });
 
             return lines;
         }
