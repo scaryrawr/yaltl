@@ -12,28 +12,7 @@ namespace tofi
     Tofi::Tofi(Modes &&modes) : m_container{ftxui::Container::Vertical()}, m_search{}, m_mode{}, m_modes{std::move(modes)}
     {
         m_search.placeholder = L"Search";
-        m_search.on_enter = [this] {
-            if (!m_activeResults.empty())
-            {
-                auto &result{m_activeResults[this->m_results.selected]};
-                const PostExec postAction{m_modes[m_mode]->execute(*result.result, m_search.content)};
-                switch (postAction)
-                {
-                case PostExec::StayOpen:
-                    // Invalidate since we might get new things for staying open
-                    m_previousSearch.reset();
-                    m_previousMode.reset();
-
-                    break;
-                case PostExec::CloseFailure:
-                    on_exit(-1);
-                    break;
-                case PostExec::CloseSuccess:
-                    on_exit(0);
-                    break;
-                }
-            }
-        };
+        m_search.on_enter = std::bind(&Tofi::execute, this);
 
         Add(&m_container);
         m_container.Add(&m_search);
@@ -41,6 +20,30 @@ namespace tofi
         m_results.selected_style = ftxui::bold | ftxui::color(ftxui::Color::Black) | ftxui::bgcolor(ftxui::Color::Green);
         m_results.selected = 0;
         m_container.Add(&m_results);
+    }
+
+    void Tofi::execute()
+    {
+        if (!m_activeResults.empty())
+        {
+            auto &result{m_activeResults[this->m_results.selected]};
+            const PostExec postAction{m_modes[m_mode]->execute(*result.result, m_search.content)};
+            switch (postAction)
+            {
+            case PostExec::StayOpen:
+                // Invalidate since we might get new things for staying open
+                m_previousSearch.reset();
+                m_previousMode.reset();
+
+                break;
+            case PostExec::CloseFailure:
+                on_exit(-1);
+                break;
+            case PostExec::CloseSuccess:
+                on_exit(0);
+                break;
+            }
+        }
     }
 
     void Tofi::next_mode()
@@ -200,7 +203,6 @@ namespace tofi
 
         m_previousSearch = realSearch;
         m_previousMode = m_mode;
-
 
         if (m_results.selected >= m_results.entries.size())
         {

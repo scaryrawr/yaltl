@@ -22,6 +22,7 @@ namespace tofi
     public:
         Tofi(Modes &&);
 
+        void execute();
         void next_mode();
         void previous_mode();
         void move(Move move);
