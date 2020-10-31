@@ -170,9 +170,10 @@ namespace tofi
                 std::optional<std::wstring_view> fuzzFactor;
                 if (criteria.has_value())
                 {
-                    std::vector<std::optional<std::wstring>> fuzz(criteria.value().size());
-                    std::transform(std::begin(criteria.value()), std::end(criteria.value()), std::begin(fuzz), [&regex, &fuzzy](const std::wstring &critter) {
-                        return string::fuzzy_find<wchar_t>(critter, regex);
+                    std::vector<std::optional<std::wstring_view>> fuzz;
+                    fuzz.reserve(criteria.value().size());
+                    std::transform(std::begin(criteria.value()), std::end(criteria.value()), std::back_inserter(fuzz), [&regex, &fuzzy](const std::wstring &critter) {
+                        return std::move(string::fuzzy_find<wchar_t>(critter, regex));
                     });
 
                     fuzz.erase(std::remove(std::begin(fuzz), std::end(fuzz), std::nullopt), std::end(fuzz));
