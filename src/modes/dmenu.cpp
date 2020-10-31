@@ -25,11 +25,13 @@ namespace tofi
                 buffer.insert(std::end(buffer), buff, buff + size);
             }
 
-            std::vector<std::string_view> rawLines(std::count(std::begin(buffer), std::end(buffer), '\n') + 1);
-            mtl::string::split(buffer.data(), "\n", std::begin(rawLines));
+            std::vector<std::string_view> rawLines;
+            rawLines.reserve(std::count(std::begin(buffer), std::end(buffer), '\n') + 1);
+            mtl::string::split(buffer.data(), "\n", std::back_inserter(rawLines));
 
-            Entries lines(rawLines.size());
-            std::transform(std::begin(rawLines), std::end(rawLines), std::begin(lines), [](std::string_view line) {
+            Entries lines;
+            lines.reserve(rawLines.size());
+            std::transform(std::begin(rawLines), std::end(rawLines), std::back_inserter(lines), [](std::string_view line) {
                 return std::make_shared<Entry>(string::converter.from_bytes(std::begin(line), std::end(line)));
             });
 
