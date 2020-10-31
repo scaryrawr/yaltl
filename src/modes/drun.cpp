@@ -43,12 +43,17 @@ namespace tofi
                     appResult->app = appinfo;
                     if (appinfo->should_show())
                     {
-                        appResult->criteria = std::vector<std::wstring>{{
+                        std::vector<std::wstring> criteria{{
                             string::converter.from_bytes(appinfo->get_name()),
                             string::converter.from_bytes(appinfo->get_display_name()),
                             string::converter.from_bytes(appinfo->get_executable()),
                             string::converter.from_bytes(commands::parse(appinfo->get_commandline()).path.filename()),
                         }};
+
+                        std::sort(std::begin(criteria), std::end(criteria), mtl::string::iless<wchar_t>{});
+                        criteria.erase(std::unique(std::begin(criteria), std::end(criteria), mtl::string::iequals<wchar_t>{}), std::end(criteria));
+
+                        appResult->criteria.emplace(std::move(criteria));
                     }
 
                     return appResult;
