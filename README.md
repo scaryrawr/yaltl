@@ -9,16 +9,22 @@ Why tofi? A play on [toffee](https://en.wikipedia.org/wiki/Toffee), and because 
 
 And it's based on using the terminal for UI.
 
+![tofi demo](./images/tofi.gif)
+
 ## Dependencies
 
+- [clang](http://llvm.org/)
 - [ftxui](https://github.com/ArthurSonzogni/FTXUI)
 - [giomm](https://developer.gnome.org/glibmm/stable/)
 - [i3ipcpp](https://github.com/drmgc/i3ipcpp)
+- [mtl](https://github.com/scaryrawr/mtl)
 
 ## Building
 
 ```sh
 cd tofi
+export CC=clang
+export CXX=clang++
 mkdir build && cd build
 cmake ..
 make
