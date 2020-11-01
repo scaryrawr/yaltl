@@ -67,8 +67,12 @@ namespace tofi
             int tty{dup(STDOUT_FILENO)};
             dup2(m_stdoutCopy.value(), STDOUT_FILENO);
 
-            std::wcout << result.display << std::endl;
+            std::wstring selected{result.display};
+            mtl::string::replace_all(selected, L" ", L"\\ ");
 
+            std::wcout << selected << std::endl;
+
+            // Restore the tty stdout so FTXUI can clean up
             dup2(tty, STDOUT_FILENO);
 
             return PostExec::CloseSuccess;
