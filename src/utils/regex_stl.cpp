@@ -1,4 +1,4 @@
-#include "utils/regex/regex_stl.h"
+#include "utils/regex.h"
 
 #include <functional>
 #include <sstream>
@@ -8,16 +8,9 @@ namespace tofi
 {
     namespace regex
     {
-        const wchar_t *regex_delim()
-        {
-            return L".*";
-        }
-
         regex_t build_regex(std::wstring_view search)
         {
-            std::wostringstream builder;
-            std::copy_if(std::begin(search), std::end(search), std::ostream_iterator<wchar_t, wchar_t>(builder, regex_delim()), std::not_fn(std::bind(std::isspace<wchar_t>, std::placeholders::_1, std::locale())));
-            return std::wregex{builder.str(), std::regex_constants::icase};
+            return std::wregex{build_pattern(search), std::regex_constants::icase};
         }
 
         std::optional<std::wstring_view> fuzzy_find(std::wstring_view outer, const regex_t &search)

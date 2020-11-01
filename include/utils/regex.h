@@ -10,6 +10,8 @@ namespace tofi
 {
     namespace regex
     {
+        std::wstring build_pattern(std::wstring_view search);
+
         regex_t build_regex(std::wstring_view search);
 
         /**

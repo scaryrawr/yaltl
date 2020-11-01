@@ -1,4 +1,4 @@
-#include "utils/regex/regex_pcre.h"
+#include "utils/regex.h"
 
 #include <functional>
 #include <limits>
@@ -9,20 +9,12 @@ namespace tofi
 {
     namespace regex
     {
-        const wchar_t *regex_delim()
-        {
-            return L".*";
-        }
-
         regex_t build_regex(std::wstring_view search)
         {
-            std::wostringstream builder;
-            std::copy_if(std::begin(search), std::end(search), std::ostream_iterator<wchar_t, wchar_t>(builder, regex_delim()), std::not_fn(std::bind(std::isspace<wchar_t>, std::placeholders::_1, std::locale())));
-
-            std::wstring pattern{builder.str()};
-            pattern = pattern.substr(0, pattern.size() - 2);
+            std::wstring pattern{build_pattern(search)};
             int32_t error{};
             PCRE2_SIZE errorOffset{};
+
             return regex_t{pcre2_compile(reinterpret_cast<PCRE2_SPTR32>(pattern.c_str()), PCRE2_ZERO_TERMINATED, PCRE2_CASELESS, &error, &errorOffset, nullptr)};
         }
 

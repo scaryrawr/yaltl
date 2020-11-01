@@ -45,6 +45,7 @@ set(SOURCES
     ./src/modes/run.cpp
     ./src/modes/script.cpp
     ./src/utils/command.cpp
+    ./src/utils/regex.cpp
     ./src/utils/spawn.cpp
 )
 
