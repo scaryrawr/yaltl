@@ -157,7 +157,7 @@ namespace tofi
         std::wstring_view realSearch{get_search(m_search.content, m_modes[m_mode]->first_word_only())};
         if (!m_previousSearch.has_value() || m_previousSearch.value() != realSearch)
         {
-            m_regex = string::build_regex<wchar_t>(realSearch);
+            m_regex = regex::build_regex(realSearch);
         }
 
         if (!m_previousSearch.has_value() ||
@@ -173,7 +173,7 @@ namespace tofi
                     std::vector<std::optional<std::wstring_view>> fuzz;
                     fuzz.reserve(criteria.value().size());
                     std::transform(std::begin(criteria.value()), std::end(criteria.value()), std::back_inserter(fuzz), [&regex, &fuzzy](const std::wstring &critter) {
-                        return std::move(string::fuzzy_find<wchar_t>(critter, regex));
+                        return std::move(regex::fuzzy_find(critter, regex));
                     });
 
                     fuzz.erase(std::remove(std::begin(fuzz), std::end(fuzz), std::nullopt), std::end(fuzz));
@@ -184,7 +184,7 @@ namespace tofi
                 }
                 else
                 {
-                    fuzzFactor = string::fuzzy_find<wchar_t>(fuzzy.result->display, regex);
+                    fuzzFactor = regex::fuzzy_find(fuzzy.result->display, regex);
                 }
 
                 return FuzzyResult{fuzzy.result, fuzzFactor};
@@ -195,12 +195,12 @@ namespace tofi
                                       return !fuzzy.match.has_value();
                                   }),
                                   std::end(m_activeResults));
-
-            m_results.entries.resize(m_activeResults.size());
-            std::transform(std::begin(m_activeResults), std::end(m_activeResults), std::begin(m_results.entries), [](const FuzzyResult &result) {
-                return result.result->display;
-            });
         }
+
+        m_results.entries.resize(m_activeResults.size());
+        std::transform(std::begin(m_activeResults), std::end(m_activeResults), std::begin(m_results.entries), [](const FuzzyResult &result) {
+            return result.result->display;
+        });
 
         m_previousSearch = realSearch;
         m_previousMode = m_mode;

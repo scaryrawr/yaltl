@@ -8,6 +8,7 @@
 
 #include "mode.h"
 #include "utils/fuzzyresult.h"
+#include "utils/regex.h"
 
 namespace tofi
 {
@@ -40,6 +41,6 @@ namespace tofi
         std::vector<FuzzyResult> m_activeResults;
         std::optional<std::wstring> m_previousSearch;
         std::optional<int32_t> m_previousMode;
-        std::wregex m_regex;
+        regex::regex_t m_regex;
     };
 } // namespace tofi
