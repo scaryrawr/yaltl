@@ -12,6 +12,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 find_package(PkgConfig REQUIRED)
 
 pkg_check_modules(GIOMM REQUIRED giomm-2.4)
+pkg_check_modules(GTKMM REQUIRED gtkmm-3.0)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -42,6 +43,7 @@ set(SOURCES
     ./src/modes/dmenu.cpp
     ./src/modes/drun.cpp
     ./src/modes/i3wm.cpp
+    ./src/modes/recent.cpp
     ./src/modes/run.cpp
     ./src/modes/script.cpp
     ./src/utils/command.cpp
@@ -62,8 +64,8 @@ add_executable(tofi ${SOURCES})
 
 target_include_directories(tofi PRIVATE include)
 
-target_link_libraries(tofi ftxui::screen ftxui::dom ftxui::component i3ipc++ mtl ${GIOMM_LIBRARIES} ${PCRE2_LIBRARIES})
-target_include_directories(tofi PRIVATE ${GIOMM_INCLUDE_DIRS} ${PCRE2_INCLUDE_DIRS})
-target_compile_options(tofi PRIVATE ${GIOMM_CFLAGS} ${PCRE2_CFLAGS})
+target_link_libraries(tofi ftxui::screen ftxui::dom ftxui::component i3ipc++ mtl ${GIOMM_LIBRARIES} ${GTKMM_LIBRARIES} ${PCRE2_LIBRARIES})
+target_include_directories(tofi PRIVATE ${GIOMM_INCLUDE_DIRS} ${GTKMM_INCLUDE_DIRS} ${PCRE2_INCLUDE_DIRS})
+target_compile_options(tofi PRIVATE ${GIOMM_CFLAGS} ${GTKMM_CFLAGS} ${PCRE2_CFLAGS})
 
 install(TARGETS tofi)

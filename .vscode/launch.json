@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/tofi",
-            "args": ["-m", "drun,run,i3wm"],
+            "args": ["-m", "drun,recent,run,i3wm"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

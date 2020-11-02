@@ -75,12 +75,14 @@
         "*.ipp": "cpp"
     },
     "cSpell.words": [
+        "SPTR",
         "dmenu",
         "drun",
         "ftxui",
         "iequals",
         "ierase",
         "iless",
+        "ovector",
         "pfile",
         "tofi",
         "wcregex",

@@ -1,9 +1,9 @@
 #pragma once
 
 #include "../mode.h"
-#include <giomm/appinfo.h>
-#include <giomm/desktopappinfo.h>
 #include <future>
+
+#define TOFI_HAS_DRUN
 
 namespace tofi
 {

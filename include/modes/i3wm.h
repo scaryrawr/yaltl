@@ -4,6 +4,8 @@
 
 #include <i3ipc++/ipc.hpp>
 
+#define TOFI_HAS_I3WM
+
 namespace tofi
 {
     namespace modes

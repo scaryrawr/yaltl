@@ -15,6 +15,13 @@ namespace tofi
     {
         using con_t = std::shared_ptr<i3ipc::container_t>;
 
+        struct ContainerEntry : public Entry
+        {
+            using Entry::Entry;
+
+            con_t container;
+        };
+
         namespace tree
         {
             /**
@@ -165,15 +172,6 @@ namespace tofi
             i3ipc::g_logging_outs.clear();
         }
 
-        struct ContainerResult : public Entry
-        {
-            ContainerResult(std::wstring &&name) : Entry(std::move(name))
-            {
-            }
-
-            con_t container;
-        };
-
         const Entries &i3wm::results()
         {
             // Always query for active windows since it can change as we go
@@ -181,7 +179,7 @@ namespace tofi
             m_active.resize(tree.size());
 
             std::transform(std::begin(tree), std::end(tree), std::begin(m_active), [](con_t &con) {
-                auto result{std::make_shared<ContainerResult>(string::converter.from_bytes(con->name))};
+                auto result{std::make_shared<ContainerEntry>(string::converter.from_bytes(con->name))};
                 result->container = con;
 
                 return result;
@@ -197,7 +195,7 @@ namespace tofi
          */
         void i3wm::preview(const Entry &selected)
         {
-            auto res = reinterpret_cast<const ContainerResult *>(&selected);
+            auto res = reinterpret_cast<const ContainerEntry *>(&selected);
             auto con{res->container};
             if (!con->workspace.has_value())
             {
@@ -218,7 +216,7 @@ namespace tofi
          */
         PostExec i3wm::execute(const Entry &result, const std::wstring &)
         {
-            auto res = reinterpret_cast<const ContainerResult *>(&result);
+            auto res = reinterpret_cast<const ContainerEntry *>(&result);
             auto con{res->container};
 
             return m_conn.send_command(commands::focus_window(*con)) ? PostExec::CloseSuccess : PostExec::CloseFailure;

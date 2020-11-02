@@ -7,6 +7,8 @@
 #include <string_view>
 #include <vector>
 
+#define TOFI_HAS_SCRIPT
+
 namespace tofi
 {
     namespace modes

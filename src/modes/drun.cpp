@@ -1,9 +1,10 @@
 #include "modes/drun.h"
-#include "glibmm/listhandle.h"
 #include "utils/command.h"
 #include "utils/spawn.h"
 #include "utils/string.h"
 
+#include <giomm/appinfo.h>
+#include <giomm/init.h>
 #include <mtl/string.hpp>
 
 #include <algorithm>
@@ -13,11 +14,9 @@ namespace tofi
 {
     using AppInfo = Glib::RefPtr<Gio::AppInfo>;
 
-    struct AppResult : public Entry
+    struct AppEntry : public Entry
     {
-        AppResult(std::wstring &&name) : Entry(std::move(name))
-        {
-        }
+        using Entry::Entry;
 
         AppInfo app;
     };
@@ -35,11 +34,14 @@ namespace tofi
 
         std::future<Entries> load_apps()
         {
+            static std::once_flag GIO_INIT_FLAG;
+            std::call_once(GIO_INIT_FLAG, Gio::init);
+
             return std::async(std::launch::async, [] {
                 auto apps{Gio::AppInfo::get_all()};
                 Entries results(apps.size());
                 std::transform(std::begin(apps), std::end(apps), std::begin(results), [](AppInfo appinfo) {
-                    auto appResult{std::make_shared<AppResult>(get_app_display(appinfo))};
+                    auto appResult{std::make_shared<AppEntry>(get_app_display(appinfo))};
                     appResult->app = appinfo;
                     if (appinfo->should_show())
                     {
@@ -60,7 +62,7 @@ namespace tofi
                 });
 
                 results.erase(std::remove_if(std::begin(results), std::end(results), [](std::shared_ptr<Entry> res) {
-                                  auto ptr{reinterpret_cast<AppResult *>(res.get())};
+                                  auto ptr{reinterpret_cast<AppEntry *>(res.get())};
                                   return !ptr->app->should_show();
                               }),
                               std::end(results));
@@ -86,7 +88,7 @@ namespace tofi
 
         PostExec drun::execute(const Entry &result, const std::wstring &)
         {
-            const AppResult *appResult = reinterpret_cast<const AppResult *>(&result);
+            const AppEntry *appResult = reinterpret_cast<const AppEntry *>(&result);
             auto &info{appResult->app};
             std::string full_command{info->get_commandline()};
 

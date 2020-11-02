@@ -3,6 +3,8 @@
 #include "../mode.h"
 #include "utils/popen.h"
 
+#define TOFI_HAS_DMENU
+
 namespace tofi
 {
     namespace modes
