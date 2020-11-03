@@ -138,30 +138,33 @@ namespace tofi
         return search;
     }
 
-    ftxui::Element Tofi::Render()
+    void Tofi::UpdateEntries()
     {
         if (!m_previousSearch.has_value() ||                                         // First run
             m_search.content.find(m_previousSearch.value()) == std::wstring::npos || // Search scope increased
             !m_previousMode.has_value() ||                                           // First run mode
             m_mode != m_previousMode.value())                                        // mode change
         {
-            const Entries &results{m_modes[m_mode]->results()};
+            const Entries &results{m_modes[m_mode]->Results()};
             m_activeResults.resize(results.size());
             std::transform(std::begin(results), std::end(results), std::begin(m_activeResults), [](std::shared_ptr<Entry> ptr) {
                 return FuzzyResult{ptr, std::nullopt};
             });
         }
+    }
 
-        std::wstring_view realSearch{get_search(m_search.content, m_modes[m_mode]->first_word_only())};
+    void Tofi::FilterEntries()
+    {
+        std::wstring_view realSearch{get_search(m_search.content, m_modes[m_mode]->FirstWordOnly())};
         if (!m_previousSearch.has_value() || m_previousSearch.value() != realSearch)
         {
             m_regex = regex::build_regex(realSearch);
         }
 
-        if (!m_previousSearch.has_value() ||
+        if (!realSearch.empty() && (!m_previousSearch.has_value() ||
             m_previousSearch.value() != realSearch ||
             !m_previousMode.has_value() ||
-            m_previousMode.value() != m_mode)
+                                    m_previousMode.value() != m_mode))
         {
             std::transform(std::begin(m_activeResults), std::end(m_activeResults), std::begin(m_activeResults), [&regex{m_regex}](const FuzzyResult &fuzzy) {
                 auto &criteria = fuzzy.result->criteria;
@@ -170,8 +173,8 @@ namespace tofi
                 {
                     std::vector<std::optional<std::wstring_view>> fuzz;
                     fuzz.reserve(criteria.value().size());
-                    std::transform(std::begin(criteria.value()), std::end(criteria.value()), std::back_inserter(fuzz), [&regex, &fuzzy](const std::wstring &critter) {
-                        return std::move(regex::fuzzy_find(critter, regex));
+                    std::transform(std::begin(criteria.value()), std::end(criteria.value()), std::back_inserter(fuzz), [&regex](const std::wstring &critter) {
+                        return regex::fuzzy_find(critter, regex);
                     });
 
                     fuzz.erase(std::remove(std::begin(fuzz), std::end(fuzz), std::nullopt), std::end(fuzz));
@@ -189,11 +192,19 @@ namespace tofi
             });
 
             std::sort(std::begin(m_activeResults), std::end(m_activeResults));
+
             m_activeResults.erase(std::remove_if(std::begin(m_activeResults), std::end(m_activeResults), [](const FuzzyResult &fuzzy) {
                                       return !fuzzy.match.has_value();
                                   }),
                                   std::end(m_activeResults));
         }
+    }
+
+    ftxui::Element Tofi::Render()
+    {
+        this->UpdateEntries();
+
+        this->FilterEntries();
 
         m_results.entries.resize(m_activeResults.size());
         std::transform(std::begin(m_activeResults), std::end(m_activeResults), std::begin(m_results.entries), [](const FuzzyResult &result) {

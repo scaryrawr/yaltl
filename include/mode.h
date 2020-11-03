@@ -64,7 +64,7 @@ namespace tofi
          */
         virtual void preview(const Entry &selected){};
 
-        virtual bool first_word_only() const
+        virtual bool FirstWordOnly() const
         {
             return false;
         }

@@ -28,7 +28,7 @@ namespace tofi
 
             const Entries &results() override;
 
-            void preview(const Entry &selected) override;
+            void Preview(const Entry &selected) override;
 
             PostExec execute(const Entry &result, const std::wstring &) override;
 

@@ -194,7 +194,7 @@ namespace tofi
          * 
          * @param selected The window to check out
          */
-        void i3wm::preview(const Entry &selected)
+        void i3wm::Preview(const Entry &selected)
         {
             auto res = reinterpret_cast<const ContainerEntry *>(&selected);
             auto con{res->container};
