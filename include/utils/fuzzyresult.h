@@ -27,7 +27,7 @@ namespace tofi
          * - Otherwise - one with shorter fuzz is less
          * 
          */
-        auto operator<=>(const FuzzyResult &other)
+        auto operator<=>(const FuzzyResult &other) const
         {
             if (!match.has_value() && !other.match.has_value())
             {
