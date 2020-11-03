@@ -9,7 +9,7 @@
 
 namespace tofi
 {
-    bool spawn(const Command &command)
+    bool spawn(Command command)
     {
         std::ostringstream argbuilder;
         argbuilder << command.path;

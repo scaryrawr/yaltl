@@ -17,6 +17,8 @@
 //#define dup2 _dup2
 #define STDOUT_FILENO _fileno(stdout)
 #define STDIN_FILENO _fileno(stdin)
+#else
+#include <unistd.h>
 #endif
 
 namespace tofi

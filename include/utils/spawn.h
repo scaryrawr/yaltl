@@ -11,5 +11,5 @@ namespace tofi
      * @return true - Process most likely started
      * @return false - Process most likely not started
      */
-    bool spawn(const Command &command);
+    bool spawn(Command command);
 } // namespace tofi

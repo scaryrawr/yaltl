@@ -8,7 +8,7 @@
 
 namespace tofi
 {
-    bool spawn(const Command &command)
+    bool spawn(Command command)
     {
         // Fork first child to start a new session
         pid_t pid{fork()};
