@@ -1,6 +1,8 @@
 #pragma once
 
-#ifndef TOFI_USE_PCRE
+#include <TofiConfig.h>
+
+#ifndef PCRE2_FOUND
 #include "./regex/regex_stl.h"
 #else
 #include "./regex/regex_pcre.h"

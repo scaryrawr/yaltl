@@ -79,6 +79,7 @@
         "dmenu",
         "drun",
         "ftxui",
+        "hbox",
         "iequals",
         "ierase",
         "iless",
@@ -87,7 +88,8 @@
         "tofi",
         "wcregex",
         "wfuzzy",
-        "wregex"
+        "wregex",
+        "yframe"
     ],
     "editor.formatOnSave": true
 }

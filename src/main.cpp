@@ -1,9 +1,19 @@
-#include "tofi.h"
+#include <TofiConfig.h>
 
+#include "tofi.h"
 #include "modes/dmenu.h"
+#ifdef GIOMM_FOUND
 #include "modes/drun.h"
+#endif
+
+#ifdef I3IPC_FOUND
 #include "modes/i3wm.h"
+#endif
+
+#ifdef GTKMM_FOUND
 #include "modes/recent.h"
+#endif
+
 #include "modes/run.h"
 #include "modes/script.h"
 
@@ -28,37 +38,29 @@ void help()
 	std::cout << "tofi usage:" << std::endl
 			  << "\ttofi [--options]" << std::endl
 			  << "Options:" << std::endl;
-
-#ifdef TOFI_HAS_DMENU
 	std::cout << "\t-d, --dmenu\tRun in dmenu mode" << std::endl;
-#endif
 	std::cout << "\t-m, --modes\tStart with modes enabled [drun,run,i3wm]" << std::endl
 			  << "\t-h, --help \tDisplay this message" << std::endl
 			  << "Modes:" << std::endl;
-#ifdef TOFI_HAS_DRUN
+#ifdef GIOMM_FOUND
 	std::cout << "\tdrun\tRun from list of desktop installed applications" << std::endl;
 #endif
 
-#ifdef TOFI_HAS_RECENT
+#ifdef GTKMM_FOUND
 	std::cout << "\recent\tOpen a recently opened file" << std::endl;
 #endif
 
-#ifdef TOFI_HAS_RUN
 	std::cout << "\trun \tRun from binaries on $PATH" << std::endl;
-#endif
-
-#ifdef TOFI_HAS_I3WM
+#ifdef I3IPC_FOUND
 	std::cout << "\ti3wm\tSwitch between active windows using i3ipc" << std::endl;
 #endif
 
-#ifdef TOFI_HAS_SCRIPT
 	std::cout << "Script:" << std::endl
 			  << "\tPass a custom command disp:command" << std::endl
 			  << "\t\t -m list:ls" << std::endl
 			  << std::endl
 			  << "\tcommand will be called with selected result" << std::endl
 			  << "\ttofi will stay open as long as command prints output" << std::endl;
-#endif
 
 	exit(-1);
 }
@@ -141,35 +143,31 @@ int main(int argc, char **argv)
 	else
 	{
 		std::transform(std::begin(options.modes), std::end(options.modes), std::back_inserter(modes), [](const LaunchMode &mode) -> std::unique_ptr<tofi::Mode> {
-#ifdef TOFI_HAS_SCRIPT
 			if (mode.script.has_value())
 			{
 				return std::make_unique<tofi::modes::script>(mode.mode, mode.script.value());
 			}
-#endif
 
-#ifdef TOFI_HAS_I3WM
+#ifdef I3IPC_FOUND
 			if ("i3wm" == mode.mode)
 			{
 				return std::make_unique<tofi::modes::i3wm>("tofi");
 			}
 #endif
 
-#ifdef TOFI_HAS_RUN
 			if ("run" == mode.mode)
 			{
 				return std::make_unique<tofi::modes::run>();
 			}
-#endif
 
-#ifdef TOFI_HAS_DRUN
+#ifdef GIOMM_FOUND
 			if ("drun" == mode.mode)
 			{
 				return std::make_unique<tofi::modes::drun>();
 			}
 #endif
 
-#ifdef TOFI_HAS_RECENT
+#ifdef GTKMM_FOUND
 			if ("recent" == mode.mode)
 			{
 				return std::make_unique<tofi::modes::recent>();

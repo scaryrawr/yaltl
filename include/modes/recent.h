@@ -4,8 +4,6 @@
 
 #include <future>
 
-#define TOFI_HAS_RECENT
-
 namespace tofi
 {
 	namespace modes
