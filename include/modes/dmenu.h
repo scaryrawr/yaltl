@@ -41,10 +41,10 @@ namespace tofi
             const Entries m_entries;
 
             //! The file descriptor to "stdout"
-            std::optional<int> m_stdoutCopy{};
+            int m_stdoutCopy{};
 
             //! The file descriptor to "stdin"
-            std::optional<int> m_stdinCopy{};
+            int m_stdinCopy{};
 
             //! The file handle to tty-in
             unique_file m_ttyIn;

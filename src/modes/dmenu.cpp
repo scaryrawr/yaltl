@@ -13,11 +13,13 @@
 #ifdef WIN32
 #include <io.h>
 #include <Windows.h>
-//#define dup _dup
-//#define dup2 _dup2
+constexpr auto CONSOLE_INPUT = "CONIN$";
+constexpr auto CONSOLE_OUTPUT = "CONOUT$";
 #define STDOUT_FILENO _fileno(stdout)
 #define STDIN_FILENO _fileno(stdin)
 #else
+constexpr auto CONIN = "/dev/tty";
+constexpr auto CONSOLE_OUTPUT = "/dev/tty";
 #include <unistd.h>
 #endif
 
@@ -33,7 +35,7 @@ namespace tofi
         Entries load_stdin()
         {
             std::vector<char> buffer;
-            char buff[1024] {};
+            char buff[1024]{};
             for (size_t size{fread(buff, 1, sizeof(buff), stdin)}; size > 0; size = fread(buff, 1, sizeof(buff), stdin))
             {
                 buffer.insert(std::end(buffer), buff, buff + size);
@@ -55,33 +57,34 @@ namespace tofi
             return lines;
         }
 
-        dmenu::dmenu() : m_entries(load_stdin()),                   // Load stdin before re-routing I/O
-                         m_stdoutCopy{dup(STDOUT_FILENO)},          // Save off stdout, this is what gets piped to the next process
-                         m_stdinCopy{dup(STDIN_FILENO)},            // Save off stdin, probably not important...
-                         m_ttyIn{freopen("/dev/tty", "r", stdin)},  // Open up the tty for input (otherwise the user can't interact with tofi)
-                         m_ttyOut{freopen("/dev/tty", "a", stdout)} // Open up the tty for output (otherwise tofi won't render).
+        dmenu::dmenu() : m_entries(load_stdin()),                       // Load stdin before re-routing I/O
+                         m_stdoutCopy{dup(STDOUT_FILENO)},              // Save off stdout, this is what gets piped to the next process
+                         m_stdinCopy{dup(STDIN_FILENO)},                // Save off stdin, probably not important...
+                         m_ttyIn{freopen(CONSOLE_INPUT, "r", stdin)},   // Open up the tty for input (otherwise the user can't interact with tofi)
+                         m_ttyOut{freopen(CONSOLE_OUTPUT, "w", stdout)} // Open up the tty for output (otherwise tofi won't render).
         {
+#ifdef WIN32
+            std::ios::sync_with_stdio(true);
+
+            std::cout.clear();
+            std::wcout.clear();
+            std::cin.clear();
+            std::wcin.clear();
+#endif
         }
 
         dmenu::~dmenu()
         {
             // Restore original stdout and stdin
-            if (m_stdoutCopy.has_value())
-            {
-                dup2(m_stdoutCopy.value(), STDOUT_FILENO);
-            }
-
-            if (m_stdinCopy.has_value())
-            {
-                dup2(m_stdinCopy.value(), STDIN_FILENO);
-            }
+            dup2(m_stdoutCopy, STDOUT_FILENO);
+            dup2(m_stdinCopy, STDIN_FILENO);
         }
 
         PostExec dmenu::Execute(const Entry &result, const std::wstring &)
         {
             // Restore the original stdout so we can write to the next process in the pipeline
             int tty{dup(STDOUT_FILENO)};
-            dup2(m_stdoutCopy.value(), STDOUT_FILENO);
+            dup2(m_stdoutCopy, STDOUT_FILENO);
 
             std::wcout << result.display << std::endl;
 
