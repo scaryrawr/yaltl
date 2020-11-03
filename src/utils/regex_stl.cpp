@@ -16,7 +16,7 @@ namespace tofi
         std::optional<std::wstring_view> fuzzy_find(std::wstring_view outer, const regex_t &search)
         {
 
-            std::wcregex_iterator itr{std::begin(outer), std::end(outer), search};
+            std::wcregex_iterator itr{outer.data(), outer.data() + outer.size(), search};
             std::wcregex_iterator end{};
             auto resItr{std::min_element(itr, end, [](const auto &lhs, const auto &rhs) {
                 return lhs.length() < rhs.length();

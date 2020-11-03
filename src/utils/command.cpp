@@ -5,7 +5,7 @@ namespace tofi
 {
     namespace commands
     {
-        Command parse(const std::string &commandline)
+        Command parse(std::string_view commandline)
         {
             std::vector<std::string> argv;
             mtl::string::split<char, std::string>(commandline, " ", std::back_inserter(argv));

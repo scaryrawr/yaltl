@@ -1,7 +1,6 @@
 #pragma once
 
-#include <sys/types.h>
-#include <string>
+#include "utils/command.h"
 
 namespace tofi
 {
@@ -12,5 +11,5 @@ namespace tofi
      * @return true - Process most likely started
      * @return false - Process most likely not started
      */
-    bool spawn(const std::string &command);
+    bool spawn(Command command);
 } // namespace tofi

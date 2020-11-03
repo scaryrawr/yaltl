@@ -98,7 +98,7 @@ namespace tofi
             mtl::string::ierase_all(full_command, "%u");
             mtl::string::ierase_all(full_command, "%f");
 
-            return spawn(full_command) ? PostExec::CloseSuccess : PostExec::CloseFailure;
+            return spawn(commands::parse(full_command)) ? PostExec::CloseSuccess : PostExec::CloseFailure;
         }
     } // namespace modes
 

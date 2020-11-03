@@ -67,7 +67,7 @@ namespace tofi
 			std::ostringstream cmd;
 			cmd << "xdg-open " << entry->info->get_uri();
 
-			return (spawn(cmd.str())) ? PostExec::CloseSuccess : PostExec::CloseFailure;
+			return spawn(commands::parse(cmd.str())) ? PostExec::CloseSuccess : PostExec::CloseFailure;
 		}
 	} // namespace modes
 } // namespace tofi

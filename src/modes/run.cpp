@@ -10,11 +10,28 @@
 #include <filesystem>
 #include <locale>
 #include <numeric>
+#include <sstream>
+
+#ifdef WIN32
+#define PATH_DELIM ";"
+constexpr bool INCLUDE_COMMAND{false};
+#else
+#define PATH_DELIM ":"
+constexpr bool INCLUDE_COMMAND{true};
+#endif
 
 namespace tofi
 {
     namespace modes
     {
+        struct RunEntry : public Entry
+        {
+            using Entry::Entry;
+
+            // Windows CreateProcess requires full path to binary since it doesn't perform path look up
+            std::filesystem::path path;
+        };
+
         /**
          * @brief Gets all the binaries from $PATH
          * 
@@ -23,19 +40,18 @@ namespace tofi
         std::future<Entries> load()
         {
             return std::async(std::launch::async, []() -> Entries {
-                const char *path{std::getenv("PATH")};
+                const char *environmentPath{std::getenv("PATH")};
 
                 // There is no path environment
-                if (!path)
+                if (!environmentPath)
                 {
                     return {};
                 }
 
                 std::vector<std::string_view> paths;
-                mtl::string::split(path, ":", std::back_inserter(paths));
+                mtl::string::split(environmentPath, PATH_DELIM, std::back_inserter(paths));
 
-                std::vector<std::wstring> binaries;
-
+                std::vector<std::filesystem::path> binpaths;
                 for (auto &path : paths)
                 {
                     if (!std::filesystem::exists(path))
@@ -44,27 +60,45 @@ namespace tofi
                     }
 
                     std::filesystem::directory_iterator dir{path};
-                    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-                    std::transform(std::filesystem::begin(dir), std::filesystem::end(dir), std::back_inserter(binaries), [&converter](const std::filesystem::directory_entry &entry) {
-                        return converter.from_bytes(entry.path().filename().string());
+
+                    std::transform(std::filesystem::begin(dir), std::filesystem::end(dir), std::back_inserter(binpaths), [](const std::filesystem::directory_entry &entry) {
+                        return entry.path();
                     });
                 }
 
-                // It's possible for a binary to be in things like /usr/bin and /usr/local/bin, and we're not in the business
-                // of handling that, since it'll be handled for us when we go to spawn the command
-                std::sort(std::begin(binaries), std::end(binaries));
-                binaries.erase(std::unique(std::begin(binaries), std::end(binaries)), std::end(binaries));
-                binaries.erase(std::remove_if(std::begin(binaries), std::end(binaries), [](const std::wstring &bin) {
-                                   return bin.starts_with(L'.') || bin.starts_with(L'[') || bin.empty();
+                binpaths.erase(std::remove_if(std::begin(binpaths), std::end(binpaths), [](const std::filesystem::path &path) {
+#ifdef WIN32
+                                   return !(path.string().ends_with("exe") ||
+                                            path.string().ends_with("bat") ||
+                                            path.string().ends_with("EXE") ||
+                                            path.string().ends_with("BAT"));
+#else
+                                    const std::string bin{path.filename().string()};
+                                    return bin.starts_with('.') || bin.starts_with('[') || bin.empty();
+#endif
                                }),
-                               std::end(binaries));
+                               std::end(binpaths));
 
-                Entries res(binaries.size());
-                std::transform(std::begin(binaries), std::end(binaries), std::begin(res), [](std::wstring &bin) {
-                    return std::make_shared<Entry>(std::move(bin));
+                Entries entries;
+                entries.reserve(binpaths.size());
+                std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+                std::transform(std::begin(binpaths), std::end(binpaths), std::back_inserter(entries), [&converter](std::filesystem::path path) {
+                    auto entry{std::make_shared<RunEntry>(converter.from_bytes(path.filename().string()))};
+                    entry->path = std::move(path);
+
+                    return entry;
                 });
 
-                return res;
+                std::sort(std::begin(entries), std::end(entries), [](const std::shared_ptr<Entry> &lhs, const std::shared_ptr<Entry> &rhs) {
+                    return lhs->display < rhs->display;
+                });
+
+                entries.erase(std::unique(std::begin(entries), std::end(entries), [](const std::shared_ptr<Entry> &lhs, const std::shared_ptr<Entry> &rhs) {
+                                  return lhs->display == rhs->display;
+                              }),
+                              std::end(entries));
+
+                return entries;
             });
         }
 
@@ -85,21 +119,27 @@ namespace tofi
 
         PostExec run::Execute(const Entry &result, const std::wstring &text)
         {
+            const RunEntry *entry{reinterpret_cast<const RunEntry *>(&result)};
             std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-            std::ostringstream spawnargs;
-
-            // We don't trust the command that the user is typed since we have fuzzy find.
-            spawnargs << converter.to_bytes(result.display) << " ";
+            Command command;
+            command.path = entry->path;
 
             // User might have typed args to pass to the command as well
-            std::string command = converter.to_bytes(text.c_str());
+            std::string input{converter.to_bytes(text.c_str())};
             std::vector<std::string_view> parts;
-            mtl::string::split(command, " ", std::back_inserter(parts));
+            mtl::string::split(input, " ", std::back_inserter(parts));
 
-            // Skip the first part since it's the "incorrect" binary name
-            std::copy(std::begin(parts) + 1, std::end(parts), std::ostream_iterator<std::string_view>(spawnargs, " "));
+            command.argv.reserve(parts.size());
+            if (INCLUDE_COMMAND)
+            {
+                command.argv.push_back(command.path.string());
+            }
 
-            return spawn(spawnargs.str()) ? PostExec::CloseSuccess : PostExec::CloseFailure;
+            std::transform(std::begin(parts) + 1, std::end(parts), std::back_inserter(command.argv), [](std::string_view part) {
+                return std::string{part};
+            });
+
+            return spawn(command) ? PostExec::CloseSuccess : PostExec::CloseFailure;
         }
     } // namespace modes
 

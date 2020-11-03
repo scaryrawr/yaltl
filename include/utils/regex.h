@@ -2,6 +2,10 @@
 
 #include <TofiConfig.h>
 
+#include <optional>
+#include <string>
+#include <string_view>
+
 #ifndef PCRE2_FOUND
 #include "./regex/regex_stl.h"
 #else

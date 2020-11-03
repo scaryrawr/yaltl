@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstdio>
+#include <stdio.h>
 #include <codecvt>
 #include <locale>
 #include <sstream>
@@ -13,7 +13,12 @@
 namespace tofi
 {
     using unique_file = mtl::unique_ptr<decltype(::fclose), &::fclose>;
+
+#ifdef WIN32
+    using unique_pfile = mtl::unique_ptr<decltype(::_pclose), &::_pclose>;
+#else
     using unique_pfile = mtl::unique_ptr<decltype(::pclose), &::pclose>;
+#endif
 
     /**
      * @brief Reads all output from a command
@@ -25,7 +30,11 @@ namespace tofi
     template <class CharT = wchar_t>
     std::vector<std::basic_string<CharT>> popen(const std::string &command)
     {
+#ifdef WIN32
+        unique_pfile file{::_popen(command.c_str(), "r")};
+#else
         unique_pfile file{::popen(command.c_str(), "r")};
+#endif
         if (!file)
         {
             // failed to open script

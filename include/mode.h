@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -62,7 +63,7 @@ namespace tofi
          * @param selected The selected result to preview
          * @return The preview action to wait on if any
          */
-        virtual void Preview(const Entry &selected){};
+        virtual void Preview(const Entry &){};
 
         virtual bool FirstWordOnly() const
         {
