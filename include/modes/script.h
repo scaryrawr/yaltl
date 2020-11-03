@@ -22,14 +22,14 @@ namespace tofi
         public:
             script(std::string_view name, std::string_view script);
 
-            std::wstring name() const override
+            std::wstring Name() const override
             {
                 return m_name;
             }
 
-            const Entries &results() override;
+            const Entries &Results() override;
 
-            PostExec execute(const Entry &result, const std::wstring &) override;
+            PostExec Execute(const Entry &result, const std::wstring &) override;
 
         private:
             std::wstring m_name;

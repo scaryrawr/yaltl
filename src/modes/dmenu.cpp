@@ -64,7 +64,7 @@ namespace tofi
             }
         }
 
-        PostExec dmenu::execute(const Entry &result, const std::wstring &)
+        PostExec dmenu::Execute(const Entry &result, const std::wstring &)
         {
             // Restore the original stdout so we can write to the next process in the pipeline
             int tty{dup(STDOUT_FILENO)};

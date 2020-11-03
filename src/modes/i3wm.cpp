@@ -172,7 +172,7 @@ namespace tofi
             i3ipc::g_logging_outs.clear();
         }
 
-        const Entries &i3wm::results()
+        const Entries &i3wm::Results()
         {
             // Always query for active windows since it can change as we go
             std::vector<con_t> tree{tree::windows(m_conn.get_tree(), m_self_id)};
@@ -215,7 +215,7 @@ namespace tofi
          * @param result The window to focus
          * @return PostExec 
          */
-        PostExec i3wm::execute(const Entry &result, const std::wstring &)
+        PostExec i3wm::Execute(const Entry &result, const std::wstring &)
         {
             auto res = reinterpret_cast<const ContainerEntry *>(&result);
             auto con{res->container};

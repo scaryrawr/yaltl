@@ -20,14 +20,14 @@ namespace tofi
 
             ~drun() = default;
 
-            std::wstring name() const override
+            std::wstring Name() const override
             {
                 return L"drun";
             }
 
-            const Entries &results() override;
+            const Entries &Results() override;
 
-            PostExec execute(const Entry &result, const std::wstring &text) override;
+            PostExec Execute(const Entry &result, const std::wstring &text) override;
 
         private:
             Entries m_entries;

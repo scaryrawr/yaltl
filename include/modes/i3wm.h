@@ -21,16 +21,16 @@ namespace tofi
         public:
             i3wm(std::string &&self_id);
 
-            std::wstring name() const override
+            std::wstring Name() const override
             {
                 return L"windows";
             }
 
-            const Entries &results() override;
+            const Entries &Results() override;
 
             void Preview(const Entry &selected) override;
 
-            PostExec execute(const Entry &result, const std::wstring &) override;
+            PostExec Execute(const Entry &result, const std::wstring &) override;
 
         private:
             i3ipc::connection m_conn;

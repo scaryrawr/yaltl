@@ -77,7 +77,7 @@ namespace tofi
         {
         }
 
-        const Entries &drun::results()
+        const Entries &drun::Results()
         {
             // Get results from launch, be willing to wait
             if (m_entries.empty() && m_loading.valid())
@@ -88,7 +88,7 @@ namespace tofi
             return m_entries;
         }
 
-        PostExec drun::execute(const Entry &result, const std::wstring &)
+        PostExec drun::Execute(const Entry &result, const std::wstring &)
         {
             const AppEntry *appResult = reinterpret_cast<const AppEntry *>(&result);
             auto &info{appResult->app};

@@ -47,14 +47,14 @@ namespace tofi
         virtual ~Mode() = default;
 
         //! Gets the mode display name
-        virtual std::wstring name() const = 0;
+        virtual std::wstring Name() const = 0;
 
         /**
          * @brief Gets the results to display
          * 
          * @return Entries The results for the input box
          */
-        virtual const Entries &results() = 0;
+        virtual const Entries &Results() = 0;
 
         /**
          * @brief Asks the mode to preview the selected result
@@ -62,7 +62,7 @@ namespace tofi
          * @param selected The selected result to preview
          * @return The preview action to wait on if any
          */
-        virtual void preview(const Entry &selected){};
+        virtual void Preview(const Entry &selected){};
 
         virtual bool FirstWordOnly() const
         {
@@ -76,7 +76,7 @@ namespace tofi
          * @param text The text box contents
          * @return The result of the execution
          */
-        virtual PostExec execute(const Entry &result, const std::wstring &text) = 0;
+        virtual PostExec Execute(const Entry &result, const std::wstring &text) = 0;
     };
 
     using Modes = std::vector<std::unique_ptr<Mode>>;

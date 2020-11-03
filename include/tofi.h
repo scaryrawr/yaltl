@@ -23,10 +23,10 @@ namespace tofi
     public:
         Tofi(Modes &&);
 
-        void execute();
-        void next_mode();
-        void previous_mode();
-        void move(Move move);
+        void Execute();
+        void NextMode();
+        void PreviousMode();
+        void Move(Move move);
         bool OnEvent(ftxui::Event) override;
         ftxui::Element Render() override;
 

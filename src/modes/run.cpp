@@ -72,7 +72,7 @@ namespace tofi
         {
         }
 
-        const Entries &run::results()
+        const Entries &run::Results()
         {
             // Wait to finish loaded if needed
             if (m_binaries.empty() && m_loader.valid())
@@ -83,7 +83,7 @@ namespace tofi
             return m_binaries;
         }
 
-        PostExec run::execute(const Entry &result, const std::wstring &text)
+        PostExec run::Execute(const Entry &result, const std::wstring &text)
         {
             std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
             std::ostringstream spawnargs;

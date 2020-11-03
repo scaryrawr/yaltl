@@ -20,17 +20,17 @@ namespace tofi
             ~dmenu();
 
             std::wstring
-            name() const override
+            Name() const override
             {
                 return L"dmenu";
             }
 
-            const Entries &results() override
+            const Entries &Results() override
             {
                 return m_entries;
             }
 
-            PostExec execute(const Entry &result, const std::wstring &text) override;
+            PostExec Execute(const Entry &result, const std::wstring &text) override;
 
         private:
             ///

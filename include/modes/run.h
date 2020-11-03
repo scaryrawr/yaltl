@@ -22,19 +22,19 @@ namespace tofi
         public:
             explicit run();
 
-            std::wstring name() const override
+            std::wstring Name() const override
             {
                 return L"run";
             }
 
-            const Entries &results() override;
+            const Entries &Results() override;
 
-            bool first_word_only() const override
+            bool FirstWordOnly() const override
             {
                 return true;
             }
 
-            PostExec execute(const Entry &result, const std::wstring &text) override;
+            PostExec Execute(const Entry &result, const std::wstring &text) override;
 
         private:
             std::future<Entries> m_loader;

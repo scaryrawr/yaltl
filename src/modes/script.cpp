@@ -30,7 +30,7 @@ namespace tofi
         {
         }
 
-        const Entries &script::results()
+        const Entries &script::Results()
         {
             // We run the script before the user may even come to script mode
             if (m_results.empty() && m_loader.valid())
@@ -41,7 +41,7 @@ namespace tofi
             return m_results;
         }
 
-        PostExec script::execute(const Entry &result, const std::wstring &)
+        PostExec script::Execute(const Entry &result, const std::wstring &)
         {
             std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 

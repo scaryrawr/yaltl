@@ -10,7 +10,7 @@ namespace tofi
     Tofi::Tofi(Modes &&modes) : m_container{ftxui::Container::Vertical()}, m_search{}, m_mode{}, m_modes{std::move(modes)}
     {
         m_search.placeholder = L"Search";
-        m_search.on_enter = std::bind(&Tofi::execute, this);
+        m_search.on_enter = std::bind(&Tofi::Execute, this);
 
         Add(&m_container);
         m_container.Add(&m_search);
@@ -20,12 +20,12 @@ namespace tofi
         m_container.Add(&m_results);
     }
 
-    void Tofi::execute()
+    void Tofi::Execute()
     {
         if (!m_activeResults.empty())
         {
             auto &result{m_activeResults[this->m_results.selected]};
-            const PostExec postAction{m_modes[m_mode]->execute(*result.result, m_search.content)};
+            const PostExec postAction{m_modes[m_mode]->Execute(*result.result, m_search.content)};
             switch (postAction)
             {
             case PostExec::StayOpen:
@@ -44,16 +44,16 @@ namespace tofi
         }
     }
 
-    void Tofi::next_mode()
+    void Tofi::NextMode()
     {
         m_mode = (m_mode + 1) % m_modes.size();
     }
-    void Tofi::previous_mode()
+    void Tofi::PreviousMode()
     {
         m_mode = (m_mode + m_modes.size() - 1) % m_modes.size();
     }
 
-    void Tofi::move(Move move)
+    void Tofi::Move(Move move)
     {
         switch (move)
         {
@@ -98,25 +98,25 @@ namespace tofi
 
         if (ftxui::Event::Tab == event)
         {
-            next_mode();
+            NextMode();
             return true;
         }
 
         if (ftxui::Event::TabReverse == event)
         {
-            previous_mode();
+            PreviousMode();
             return true;
         }
 
         if (ftxui::Event::ArrowDown == event)
         {
-            move(Move::Down);
+            Move(Move::Down);
             return true;
         }
 
         if (ftxui::Event::ArrowUp == event)
         {
-            move(Move::Up);
+            Move(Move::Up);
             return true;
         }
 
@@ -162,8 +162,8 @@ namespace tofi
         }
 
         if (!realSearch.empty() && (!m_previousSearch.has_value() ||
-            m_previousSearch.value() != realSearch ||
-            !m_previousMode.has_value() ||
+                                    m_previousSearch.value() != realSearch ||
+                                    !m_previousMode.has_value() ||
                                     m_previousMode.value() != m_mode))
         {
             std::transform(std::begin(m_activeResults), std::end(m_activeResults), std::begin(m_activeResults), [&regex{m_regex}](const FuzzyResult &fuzzy) {
@@ -227,13 +227,13 @@ namespace tofi
         if (!m_activeResults.empty())
         {
             auto &res{m_activeResults[m_results.selected]};
-            m_modes[m_mode]->preview(*res.result);
+            m_modes[m_mode]->Preview(*res.result);
         }
 
         struct winsize size = {};
         ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
 
-        return ftxui::vbox({ftxui::hbox({ftxui::text(m_modes[m_mode]->name() + L": "), m_search.Render()}),
+        return ftxui::vbox({ftxui::hbox({ftxui::text(m_modes[m_mode]->Name() + L": "), m_search.Render()}),
                             m_results.Render() | ftxui::yframe | ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, size.ws_row - 1)});
     }
 } // namespace tofi

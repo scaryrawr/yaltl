@@ -51,7 +51,7 @@ namespace tofi
 		{
 		}
 
-		const Entries &recent::results()
+		const Entries &recent::Results()
 		{
 			if (m_entries.empty() && m_loading.valid())
 			{
@@ -61,7 +61,7 @@ namespace tofi
 			return m_entries;
 		}
 
-		PostExec recent::execute(const Entry &result, const std::wstring &)
+		PostExec recent::Execute(const Entry &result, const std::wstring &)
 		{
 			const RecentEntry *entry{reinterpret_cast<const RecentEntry *>(&result)};
 			std::ostringstream cmd;
