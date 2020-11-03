@@ -26,7 +26,7 @@ namespace tofi
         void Execute();
         void NextMode();
         void PreviousMode();
-        void Move(Move move);
+        void Move(tofi::Move move);
         bool OnEvent(ftxui::Event) override;
         ftxui::Element Render() override;
 

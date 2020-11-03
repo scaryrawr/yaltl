@@ -53,7 +53,7 @@ namespace tofi
         m_mode = (m_mode + m_modes.size() - 1) % m_modes.size();
     }
 
-    void Tofi::Move(Move move)
+    void Tofi::Move(tofi::Move move)
     {
         switch (move)
         {
@@ -198,6 +198,9 @@ namespace tofi
                                   }),
                                   std::end(m_activeResults));
         }
+
+        m_previousSearch = realSearch;
+        m_previousMode = m_mode;
     }
 
     ftxui::Element Tofi::Render()
@@ -210,9 +213,6 @@ namespace tofi
         std::transform(std::begin(m_activeResults), std::end(m_activeResults), std::begin(m_results.entries), [](const FuzzyResult &result) {
             return result.result->display;
         });
-
-        m_previousSearch = realSearch;
-        m_previousMode = m_mode;
 
         if (m_results.selected >= m_results.entries.size())
         {
