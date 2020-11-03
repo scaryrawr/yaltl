@@ -16,7 +16,7 @@ list(APPEND SOURCES
     ./src/modes/script.cpp
     ./src/utils/command.cpp
     ./src/utils/regex.cpp
-    ./src/utils/spawn.cpp)
+)
 
 list(APPEND LIBRARIES
     ftxui::screen
@@ -44,6 +44,28 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(ftxui)
 FetchContent_MakeAvailable(mtl)
+
+if(WIN32)
+    FetchContent_Declare(
+        WIL
+        GIT_REPOSITORY https://github.com/microsoft/wil
+    )
+
+    FetchContent_MakeAvailable(WIL)
+
+    FetchContent_Declare(
+        getopt
+        GIT_REPOSITORY https://github.com/scaryrawr/getopt
+        GIT_TAG origin/main
+    )
+
+    FetchContent_MakeAvailable(getopt)
+
+    list(APPEND SOURCES ./src/utils/win32/spawn.cpp)
+    list(APPEND LIBRARIES WIL getopt)
+else()
+    list(APPEND SOURCES ./src/utils/posix/spawn.cpp)
+endif()
 
 find_package(PkgConfig)
 if(${PKGCONFIG_FOUND})
