@@ -66,6 +66,6 @@ target_include_directories(tofi PRIVATE include)
 
 target_link_libraries(tofi ftxui::screen ftxui::dom ftxui::component i3ipc++ mtl ${GIOMM_LIBRARIES} ${GTKMM_LIBRARIES} ${PCRE2_LIBRARIES})
 target_include_directories(tofi PRIVATE ${GIOMM_INCLUDE_DIRS} ${GTKMM_INCLUDE_DIRS} ${PCRE2_INCLUDE_DIRS})
-target_compile_options(tofi PRIVATE ${GIOMM_CFLAGS} ${GTKMM_CFLAGS} ${PCRE2_CFLAGS})
+target_compile_options(tofi PRIVATE -Wall ${GIOMM_CFLAGS} ${GTKMM_CFLAGS} ${PCRE2_CFLAGS})
 
 install(TARGETS tofi)
