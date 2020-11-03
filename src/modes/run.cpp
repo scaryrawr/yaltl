@@ -66,15 +66,18 @@ namespace tofi
                     });
                 }
 
-#ifdef WIN32
                 binpaths.erase(std::remove_if(std::begin(binpaths), std::end(binpaths), [](const std::filesystem::path &path) {
+#ifdef WIN32
                                    return !(path.string().ends_with("exe") ||
                                             path.string().ends_with("bat") ||
                                             path.string().ends_with("EXE") ||
                                             path.string().ends_with("BAT"));
+#else
+                                    const std::string bin{path.filename().string()};
+                                    return bin.starts_with('.') || bin.starts_with('[') || bin.empty();
+#endif
                                }),
                                std::end(binpaths));
-#endif
 
                 Entries entries;
                 entries.reserve(binpaths.size());
