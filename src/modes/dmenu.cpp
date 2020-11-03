@@ -18,7 +18,7 @@ constexpr auto CONSOLE_OUTPUT = "CONOUT$";
 #define STDOUT_FILENO _fileno(stdout)
 #define STDIN_FILENO _fileno(stdin)
 #else
-constexpr auto CONIN = "/dev/tty";
+constexpr auto CONSOLE_INPUT = "/dev/tty";
 constexpr auto CONSOLE_OUTPUT = "/dev/tty";
 #include <unistd.h>
 #endif
@@ -70,6 +70,8 @@ namespace tofi
             std::wcout.clear();
             std::cin.clear();
             std::wcin.clear();
+            setvbuf(stdout, nullptr, _IONBF, 0);
+            setvbuf(stdin, nullptr, _IONBF, 0);
 #endif
         }
 
