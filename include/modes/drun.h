@@ -3,8 +3,6 @@
 #include "../mode.h"
 #include <future>
 
-#define TOFI_HAS_DRUN
-
 namespace tofi
 {
     namespace modes

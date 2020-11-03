@@ -7,8 +7,6 @@
 #include <vector>
 #include <filesystem>
 
-#define TOFI_HAS_RUN
-
 namespace tofi
 {
     namespace modes
