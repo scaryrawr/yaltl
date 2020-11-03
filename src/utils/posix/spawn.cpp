@@ -8,7 +8,7 @@
 
 namespace tofi
 {
-    bool spawn(const std::string &full_command)
+    bool spawn(const Command &command)
     {
         // Fork first child to start a new session
         pid_t pid{fork()};
@@ -30,8 +30,6 @@ namespace tofi
             pid = fork();
             if (0 == pid)
             {
-                Command command{commands::parse(full_command)};
-
                 std::vector<char *> argv{command.argv.size() + 1, nullptr};
                 std::transform(std::begin(command.argv), std::end(command.argv), std::begin(argv), [](std::string &str) {
                     return str.data();

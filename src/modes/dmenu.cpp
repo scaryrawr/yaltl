@@ -3,12 +3,21 @@
 #include "utils/popen.h"
 
 #include <mtl/string.hpp>
-#include <unistd.h>
 
+#include <algorithm>
 #include <cstdio>
 #include <codecvt>
 #include <iostream>
 #include <locale>
+
+#ifdef WIN32
+#include <io.h>
+#include <Windows.h>
+//#define dup _dup
+//#define dup2 _dup2
+#define STDOUT_FILENO _fileno(stdout)
+#define STDIN_FILENO _fileno(stdin)
+#endif
 
 namespace tofi
 {
@@ -22,11 +31,13 @@ namespace tofi
         Entries load_stdin()
         {
             std::vector<char> buffer;
-            char buff[1024];
-            for (ssize_t size{read(STDIN_FILENO, buff, sizeof(buff))}; size > 0; size = read(STDIN_FILENO, buff, sizeof(buff)))
+            char buff[1024] {};
+            for (size_t size{fread(buff, 1, sizeof(buff), stdin)}; size > 0; size = fread(buff, 1, sizeof(buff), stdin))
             {
                 buffer.insert(std::end(buffer), buff, buff + size);
             }
+
+            buffer.insert(std::end(buffer), '\0');
 
             std::vector<std::string_view> rawLines;
             rawLines.reserve(std::count(std::begin(buffer), std::end(buffer), '\n') + 1);
@@ -36,7 +47,7 @@ namespace tofi
             lines.reserve(rawLines.size());
             std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
             std::transform(std::begin(rawLines), std::end(rawLines), std::back_inserter(lines), [&converter](std::string_view line) {
-                return std::make_shared<Entry>(converter.from_bytes(std::begin(line), std::end(line)));
+                return std::make_shared<Entry>(converter.from_bytes(line.data(), line.data() + line.size()));
             });
 
             return lines;

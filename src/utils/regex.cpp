@@ -1,6 +1,7 @@
 #include "utils/regex.h"
 
 #include <functional>
+#include <iterator>
 #include <sstream>
 #include <string>
 

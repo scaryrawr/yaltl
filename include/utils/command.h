@@ -1,6 +1,8 @@
 #pragma once
 
 #include <filesystem>
+#include <string>
+#include <string_view>
 #include <vector>
 
 namespace tofi
@@ -28,7 +30,7 @@ namespace tofi
          * @param commandline The command line to parse. i.e: firefox -h
          * @return tofi::Command 
          */
-        tofi::Command parse(const std::string &commandline);
+        tofi::Command parse(std::string_view commandline);
     } // namespace commands
 
 } // namespace tofi

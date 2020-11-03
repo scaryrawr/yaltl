@@ -2,8 +2,6 @@
 
 #include <algorithm>
 #include <ftxui/screen/terminal.hpp>
-#include <sys/ioctl.h>
-#include <unistd.h>
 
 namespace tofi
 {
@@ -230,10 +228,9 @@ namespace tofi
             m_modes[m_mode]->Preview(*res.result);
         }
 
-        struct winsize size = {};
-        ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
+        ftxui::Terminal::Dimensions size{ftxui::Terminal::Size()};
 
         return ftxui::vbox({ftxui::hbox({ftxui::text(m_modes[m_mode]->Name() + L": "), m_search.Render()}),
-                            m_results.Render() | ftxui::yframe | ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, size.ws_row - 1)});
+                            m_results.Render() | ftxui::yframe | ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, size.dimy - 1)});
     }
 } // namespace tofi
