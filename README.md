@@ -45,7 +45,7 @@ sudo make install
 
 ## Keyboard shortcuts
 
-- Ctrl+]/Esc - Cancel out of tofi
+- Esc - Cancel out of tofi
 - Tab - Next Mode
 - Shift+Tab - Previous Mode
 
