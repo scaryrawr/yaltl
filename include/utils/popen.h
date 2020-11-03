@@ -1,8 +1,8 @@
 #pragma once
 
-#include "utils/string.h"
-
 #include <cstdio>
+#include <codecvt>
+#include <locale>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -45,13 +45,14 @@ namespace tofi
             if constexpr (sizeof(CharT) == sizeof(char))
             {
                 delim = "\n";
+                mtl::string::split<CharT, std::basic_string<CharT>>(contents.str(), delim, std::back_inserter(lines));
             }
             else
             {
                 delim = L"\n";
+                std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+                mtl::string::split<CharT, std::basic_string<CharT>>(converter.from_bytes(contents.str()), delim, std::back_inserter(lines));
             }
-
-            mtl::string::split<CharT, std::basic_string<CharT>>(string::converter.from_bytes(contents.str()), delim, std::back_inserter(lines));
 
             lines.erase(std::remove_if(std::begin(lines), std::end(lines), [](const std::basic_string<CharT> &line) {
                             return line.empty();

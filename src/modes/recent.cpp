@@ -1,11 +1,12 @@
 #include "modes/recent.h"
 
 #include "utils/spawn.h"
-#include "utils/string.h"
 
 #include <gtkmm/recentmanager.h>
 #include <gtkmm/main.h>
 
+#include <codecvt>
+#include <locale>
 #include <sstream>
 
 namespace tofi
@@ -34,8 +35,9 @@ namespace tofi
 
 				Entries entries;
 				entries.reserve(items.size());
-				std::transform(std::begin(items), std::end(items), std::back_inserter(entries), [](Glib::RefPtr<Gtk::RecentInfo> &info) {
-					auto entry{std::make_shared<RecentEntry>(string::converter.from_bytes(info->get_display_name() + ": " + info->get_uri_display()))};
+				std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+				std::transform(std::begin(items), std::end(items), std::back_inserter(entries), [&converter](Glib::RefPtr<Gtk::RecentInfo> &info) {
+					auto entry{std::make_shared<RecentEntry>(converter.from_bytes(info->get_display_name() + ": " + info->get_uri_display()))};
 					entry->info = info;
 
 					return entry;

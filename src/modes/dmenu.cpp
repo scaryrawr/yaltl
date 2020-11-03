@@ -4,8 +4,11 @@
 
 #include <mtl/string.hpp>
 #include <unistd.h>
+
 #include <cstdio>
+#include <codecvt>
 #include <iostream>
+#include <locale>
 
 namespace tofi
 {
@@ -31,19 +34,19 @@ namespace tofi
 
             Entries lines;
             lines.reserve(rawLines.size());
-            std::transform(std::begin(rawLines), std::end(rawLines), std::back_inserter(lines), [](std::string_view line) {
-                return std::make_shared<Entry>(string::converter.from_bytes(std::begin(line), std::end(line)));
+            std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+            std::transform(std::begin(rawLines), std::end(rawLines), std::back_inserter(lines), [&converter](std::string_view line) {
+                return std::make_shared<Entry>(converter.from_bytes(std::begin(line), std::end(line)));
             });
 
             return lines;
         }
 
-        dmenu::dmenu() : m_entries(load_stdin()),                    // Load stdin before re-routing I/O
-                         m_stdoutCopy{dup(STDOUT_FILENO)},           // Save off stdout, this is what gets piped to the next process
-                         m_stdinCopy{dup(STDIN_FILENO)},             // Save off stdin, probably not important...
-                         m_ttyOut{freopen("/dev/tty", "a", stdout)}, // Open up the tty for output (otherwise tofi won't render).
-                         m_ttyIn{freopen("/dev/tty", "r", stdin)}    // Open up the tty for input (otherwise the user can't interact with tofi)
-
+        dmenu::dmenu() : m_entries(load_stdin()),                   // Load stdin before re-routing I/O
+                         m_stdoutCopy{dup(STDOUT_FILENO)},          // Save off stdout, this is what gets piped to the next process
+                         m_stdinCopy{dup(STDIN_FILENO)},            // Save off stdin, probably not important...
+                         m_ttyIn{freopen("/dev/tty", "r", stdin)},  // Open up the tty for input (otherwise the user can't interact with tofi)
+                         m_ttyOut{freopen("/dev/tty", "a", stdout)} // Open up the tty for output (otherwise tofi won't render).
         {
         }
 

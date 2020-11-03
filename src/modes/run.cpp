@@ -1,13 +1,14 @@
 #include "modes/run.h"
 
 #include "utils/spawn.h"
-#include "utils/string.h"
 
 #include <mtl/string.hpp>
 
 #include <cstdlib>
 #include <algorithm>
+#include <codecvt>
 #include <filesystem>
+#include <locale>
 #include <numeric>
 
 namespace tofi
@@ -43,8 +44,9 @@ namespace tofi
                     }
 
                     std::filesystem::directory_iterator dir{path};
-                    std::transform(std::filesystem::begin(dir), std::filesystem::end(dir), std::back_inserter(binaries), [](const std::filesystem::directory_entry &entry) {
-                        return string::converter.from_bytes(entry.path().filename().string());
+                    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+                    std::transform(std::filesystem::begin(dir), std::filesystem::end(dir), std::back_inserter(binaries), [&converter](const std::filesystem::directory_entry &entry) {
+                        return converter.from_bytes(entry.path().filename().string());
                     });
                 }
 
@@ -75,7 +77,7 @@ namespace tofi
             // Wait to finish loaded if needed
             if (m_binaries.empty() && m_loader.valid())
             {
-                m_binaries = std::move(m_loader.get());
+                m_binaries = m_loader.get();
             }
 
             return m_binaries;
@@ -83,13 +85,14 @@ namespace tofi
 
         PostExec run::execute(const Entry &result, const std::wstring &text)
         {
+            std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
             std::ostringstream spawnargs;
 
             // We don't trust the command that the user is typed since we have fuzzy find.
-            spawnargs << string::converter.to_bytes(result.display) << " ";
+            spawnargs << converter.to_bytes(result.display) << " ";
 
             // User might have typed args to pass to the command as well
-            std::string command = string::converter.to_bytes(text.c_str());
+            std::string command = converter.to_bytes(text.c_str());
             std::vector<std::string_view> parts;
             mtl::string::split(command, " ", std::back_inserter(parts));
 

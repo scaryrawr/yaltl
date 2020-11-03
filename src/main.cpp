@@ -6,13 +6,11 @@
 #include "modes/recent.h"
 #include "modes/run.h"
 #include "modes/script.h"
-#include "utils/string.h"
 
 #include <getopt.h>
 #include <ftxui/component/screen_interactive.hpp>
 #include <mtl/string.hpp>
 
-#include <iostream>
 struct LaunchMode
 {
 	std::string_view mode;

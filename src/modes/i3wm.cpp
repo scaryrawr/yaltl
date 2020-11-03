@@ -1,9 +1,9 @@
 #include "modes/i3wm.h"
 
-#include "utils/string.h"
-
 #include <i3ipc++/log.hpp>
 
+#include <codecvt>
+#include <locale>
 #include <sstream>
 
 #define APP_ID "app_id"
@@ -178,8 +178,9 @@ namespace tofi
             std::vector<con_t> tree{tree::windows(m_conn.get_tree(), m_self_id)};
             m_active.resize(tree.size());
 
-            std::transform(std::begin(tree), std::end(tree), std::begin(m_active), [](con_t &con) {
-                auto result{std::make_shared<ContainerEntry>(string::converter.from_bytes(con->name))};
+            std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+            std::transform(std::begin(tree), std::end(tree), std::begin(m_active), [&converter](con_t &con) {
+                auto result{std::make_shared<ContainerEntry>(converter.from_bytes(con->name))};
                 result->container = con;
 
                 return result;

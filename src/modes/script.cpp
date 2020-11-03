@@ -1,7 +1,6 @@
 #include "modes/script.h"
 
 #include "utils/popen.h"
-#include "utils/string.h"
 
 #include <cstdio>
 #include <memory>
@@ -25,7 +24,7 @@ namespace tofi
             });
         }
 
-        script::script(std::string_view name, std::string_view script) : m_name(string::converter.from_bytes(std::string(name))),
+        script::script(std::string_view name, std::string_view script) : m_name(std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>>().from_bytes(std::string(name))),
                                                                          m_script(std::string(script)),
                                                                          m_loader(async_popen(m_script))
         {
@@ -36,7 +35,7 @@ namespace tofi
             // We run the script before the user may even come to script mode
             if (m_results.empty() && m_loader.valid())
             {
-                m_results = std::move(m_loader.get());
+                m_results = m_loader.get();
             }
 
             return m_results;
@@ -44,9 +43,11 @@ namespace tofi
 
         PostExec script::execute(const Entry &result, const std::wstring &)
         {
+            std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+
             // Build the command to run to see if the script keeps going or has exited nicely
             std::ostringstream cmd;
-            cmd << m_script << " " << string::converter.to_bytes(result.display);
+            cmd << m_script << " " << converter.to_bytes(result.display);
 
             // Don't load async since user since user is interacting with us anyways
             std::vector<std::wstring> output{popen(cmd.str())};

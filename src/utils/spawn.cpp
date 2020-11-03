@@ -1,7 +1,6 @@
 #include "utils/spawn.h"
 
 #include "utils/command.h"
-#include "utils/string.h"
 
 #include <vector>
 #include <sys/wait.h>

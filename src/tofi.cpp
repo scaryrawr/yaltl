@@ -1,7 +1,5 @@
 #include "tofi.h"
 
-#include "utils/string.h"
-
 #include <algorithm>
 #include <ftxui/screen/terminal.hpp>
 #include <sys/ioctl.h>

@@ -1,5 +1,4 @@
 #include "utils/command.h"
-#include "utils/string.h"
 #include <mtl/string.hpp>
 
 namespace tofi

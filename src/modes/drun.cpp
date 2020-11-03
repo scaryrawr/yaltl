@@ -1,14 +1,14 @@
 #include "modes/drun.h"
 #include "utils/command.h"
 #include "utils/spawn.h"
-#include "utils/string.h"
 
 #include <giomm/appinfo.h>
 #include <giomm/init.h>
 #include <mtl/string.hpp>
 
 #include <algorithm>
-#include <iostream>
+#include <codecvt>
+#include <locale>
 
 namespace tofi
 {
@@ -28,8 +28,9 @@ namespace tofi
             std::string description{appinfo->get_description()};
             std::string name{appinfo->get_display_name()};
             name = name.empty() ? appinfo->get_name() : name;
+            std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
-            return string::converter.from_bytes(description.empty() ? name : name + ": " + description);
+            return converter.from_bytes(description.empty() ? name : name + ": " + description);
         }
 
         std::future<Entries> load_apps()
@@ -40,16 +41,17 @@ namespace tofi
             return std::async(std::launch::async, [] {
                 auto apps{Gio::AppInfo::get_all()};
                 Entries results(apps.size());
-                std::transform(std::begin(apps), std::end(apps), std::begin(results), [](AppInfo appinfo) {
+                std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+                std::transform(std::begin(apps), std::end(apps), std::begin(results), [&converter](AppInfo appinfo) {
                     auto appResult{std::make_shared<AppEntry>(get_app_display(appinfo))};
                     appResult->app = appinfo;
                     if (appinfo->should_show())
                     {
                         std::vector<std::wstring> criteria{{
-                            string::converter.from_bytes(appinfo->get_name()),
-                            string::converter.from_bytes(appinfo->get_display_name()),
-                            string::converter.from_bytes(appinfo->get_executable()),
-                            string::converter.from_bytes(commands::parse(appinfo->get_commandline()).path.filename()),
+                            converter.from_bytes(appinfo->get_name()),
+                            converter.from_bytes(appinfo->get_display_name()),
+                            converter.from_bytes(appinfo->get_executable()),
+                            converter.from_bytes(commands::parse(appinfo->get_commandline()).path.filename()),
                         }};
 
                         std::sort(std::begin(criteria), std::end(criteria), mtl::string::iless<wchar_t>{});
@@ -80,7 +82,7 @@ namespace tofi
             // Get results from launch, be willing to wait
             if (m_entries.empty() && m_loading.valid())
             {
-                m_entries = std::move(m_loading.get());
+                m_entries = m_loading.get();
             }
 
             return m_entries;
