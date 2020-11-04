@@ -1,11 +1,14 @@
 #include "utils/regex.h"
 
+#include <algorithm>
 #include <functional>
 #include <iterator>
+#include <numeric>
 #include <sstream>
 #include <string>
 
-#define REGEX_DELIM L".*"
+constexpr auto REGEX_DELIM = L".*";
+constexpr auto SPECIAL_CHARS = L".()[\\+$^*|?";
 
 namespace tofi
 {
@@ -13,9 +16,12 @@ namespace tofi
     {
         std::wstring build_pattern(std::wstring_view search)
         {
-            std::wostringstream builder;
-            std::copy_if(std::begin(search), std::end(search), std::ostream_iterator<wchar_t, wchar_t>(builder, REGEX_DELIM), std::not_fn(std::bind(std::isspace<wchar_t>, std::placeholders::_1, std::locale())));
-            std::wstring pattern = builder.str();
+            std::wstring pattern{std::accumulate(std::begin(search), std::end(search), std::wstring{}, [](std::wstring sum, wchar_t ch) {
+                return std::move(sum) +
+                       (std::any_of(SPECIAL_CHARS, SPECIAL_CHARS + wcslen(SPECIAL_CHARS), std::bind(std::equal_to<wchar_t>(), std::placeholders::_1, ch)) ? L"\\" : L"") +
+                       ch +
+                       REGEX_DELIM;
+            })};
 
             return pattern.substr(0, pattern.size() - wcslen(REGEX_DELIM));
         }
