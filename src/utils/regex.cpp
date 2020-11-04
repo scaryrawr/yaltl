@@ -23,7 +23,7 @@ namespace tofi
                        REGEX_DELIM;
             })};
 
-            return pattern.substr(0, pattern.size() - wcslen(REGEX_DELIM));
+            return pattern;
         }
     } // namespace regex
 
