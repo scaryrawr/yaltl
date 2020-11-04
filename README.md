@@ -19,6 +19,7 @@ And it's based on using the terminal for UI.
 - [giomm](https://developer.gnome.org/glibmm/stable/) - For drun
 - [gtkmm](https://www.gtkmm.org/en/) - For recent documents
 - [i3ipcpp](https://github.com/drmgc/i3ipcpp) - For i3/sway window switching
+- [pcre2](https://www.pcre.org/current/doc/html/index.html) - regex (will fallback to C++11 regex implementation if not found)
 - [mtl](https://github.com/scaryrawr/mtl) - For vanity
 
 ## Building
