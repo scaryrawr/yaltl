@@ -14,10 +14,12 @@ And it's based on using the terminal for UI.
 ## Dependencies
 
 - [clang](http://llvm.org/)
-- [ftxui](https://github.com/ArthurSonzogni/FTXUI)
-- [giomm](https://developer.gnome.org/glibmm/stable/)
-- [i3ipcpp](https://github.com/drmgc/i3ipcpp)
-- [mtl](https://github.com/scaryrawr/mtl)
+  - C++20
+- [ftxui](https://github.com/ArthurSonzogni/FTXUI) - For TUI
+- [giomm](https://developer.gnome.org/glibmm/stable/) - For drun
+- [gtkmm](https://www.gtkmm.org/en/) - For recent documents
+- [i3ipcpp](https://github.com/drmgc/i3ipcpp) - For i3/sway window switching
+- [mtl](https://github.com/scaryrawr/mtl) - For vanity
 
 ## Building
 
@@ -37,6 +39,7 @@ sudo make install
   - Reads from stdin and outputs selection to stdout
   - Will not run with any other modes since there may be unexpected behavior
 - drun - Run from installed desktop applications
+- recent - Lists recently used documents to open
 - run - Run binary from PATH
 - i3wm - Window switcher for i3wm/sway
 - Script - Run a script
