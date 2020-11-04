@@ -46,6 +46,7 @@ namespace tofi
     {
         m_mode = (m_mode + 1) % m_modes.size();
     }
+
     void Tofi::PreviousMode()
     {
         m_mode = (m_mode + m_modes.size() - 1) % m_modes.size();
