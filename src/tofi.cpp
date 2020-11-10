@@ -9,6 +9,7 @@ namespace tofi
     {
         m_search.placeholder = L"Search";
         m_search.on_enter = std::bind(&Tofi::Execute, this);
+        m_search.on_change = std::bind(&Tofi::FilterEntries, this);
 
         Add(&m_container);
         m_container.Add(&m_search);
@@ -16,20 +17,19 @@ namespace tofi
         m_results.selected_style = ftxui::bold | ftxui::color(ftxui::Color::Black) | ftxui::bgcolor(ftxui::Color::Green);
         m_results.selected = 0;
         m_container.Add(&m_results);
+        UpdateEntries();
     }
 
     void Tofi::Execute()
     {
         if (!m_activeResults.empty())
         {
-            auto &result{m_activeResults[this->m_results.selected]};
+            auto &result{m_activeResults[m_results.selected]};
             const PostExec postAction{m_modes[m_mode]->Execute(*result.result, m_search.content)};
             switch (postAction)
             {
             case PostExec::StayOpen:
-                // Invalidate since we might get new things for staying open
-                m_previousSearch.reset();
-                m_previousMode.reset();
+                UpdateEntries();
 
                 break;
             case PostExec::CloseFailure:
@@ -45,11 +45,13 @@ namespace tofi
     void Tofi::NextMode()
     {
         m_mode = (m_mode + 1) % m_modes.size();
+        UpdateEntries();
     }
 
     void Tofi::PreviousMode()
     {
         m_mode = (m_mode + m_modes.size() - 1) % m_modes.size();
+        UpdateEntries();
     }
 
     void Tofi::Move(tofi::Move move)
@@ -139,33 +141,25 @@ namespace tofi
 
     void Tofi::UpdateEntries()
     {
-        if (!m_previousSearch.has_value() ||                                         // First run
-            m_search.content.find(m_previousSearch.value()) == std::wstring::npos || // Search scope increased
-            !m_previousMode.has_value() ||                                           // First run mode
-            m_mode != m_previousMode.value())                                        // mode change
-        {
-            const Entries &results{m_modes[m_mode]->Results()};
-            m_activeResults.resize(results.size());
-            std::transform(std::begin(results), std::end(results), std::begin(m_activeResults), [](std::shared_ptr<Entry> ptr) {
-                return FuzzyResult{ptr, std::nullopt};
-            });
-        }
+        const Entries &results{m_modes[m_mode]->Results()};
+        m_activeResults.resize(results.size());
+        std::transform(std::begin(results), std::end(results), std::begin(m_activeResults), [](std::shared_ptr<Entry> ptr) {
+            return FuzzyResult{ptr, std::nullopt};
+        });
     }
 
     void Tofi::FilterEntries()
     {
         std::wstring_view realSearch{get_search(m_search.content, m_modes[m_mode]->FirstWordOnly())};
-        if (!m_previousSearch.has_value() || m_previousSearch.value() != realSearch)
+        if (!realSearch.starts_with(m_previousSearch))
         {
-            m_regex = regex::build_regex(realSearch);
+            UpdateEntries();
         }
 
-        if (!realSearch.empty() && (!m_previousSearch.has_value() ||
-                                    m_previousSearch.value() != realSearch ||
-                                    !m_previousMode.has_value() ||
-                                    m_previousMode.value() != m_mode))
+        if (!realSearch.empty() && m_previousSearch != realSearch)
         {
-            std::transform(std::begin(m_activeResults), std::end(m_activeResults), std::begin(m_activeResults), [&regex{m_regex}](const FuzzyResult &fuzzy) {
+            regex::regex_t regex{regex::build_regex(realSearch)};
+            std::transform(std::begin(m_activeResults), std::end(m_activeResults), std::begin(m_activeResults), [&regex](const FuzzyResult &fuzzy) {
                 auto &criteria = fuzzy.result->criteria;
                 std::optional<std::wstring_view> fuzzFactor;
                 if (criteria.has_value())
@@ -199,15 +193,10 @@ namespace tofi
         }
 
         m_previousSearch = realSearch;
-        m_previousMode = m_mode;
     }
 
     ftxui::Element Tofi::Render()
     {
-        this->UpdateEntries();
-
-        this->FilterEntries();
-
         m_results.entries.resize(m_activeResults.size());
         std::transform(std::begin(m_activeResults), std::end(m_activeResults), std::begin(m_results.entries), [](const FuzzyResult &result) {
             return result.result->display;

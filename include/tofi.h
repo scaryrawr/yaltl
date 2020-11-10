@@ -46,8 +46,6 @@ namespace tofi
         int32_t m_mode{};
         Modes m_modes;
         std::vector<FuzzyResult> m_activeResults;
-        std::optional<std::wstring> m_previousSearch;
-        std::optional<int32_t> m_previousMode;
-        regex::regex_t m_regex;
+        std::wstring m_previousSearch;
     };
 } // namespace tofi
