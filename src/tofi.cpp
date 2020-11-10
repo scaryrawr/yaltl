@@ -46,12 +46,14 @@ namespace tofi
     {
         m_mode = (m_mode + 1) % m_modes.size();
         UpdateEntries();
+        FilterEntries();
     }
 
     void Tofi::PreviousMode()
     {
         m_mode = (m_mode + m_modes.size() - 1) % m_modes.size();
         UpdateEntries();
+        FilterEntries();
     }
 
     void Tofi::Move(tofi::Move move)
@@ -141,12 +143,7 @@ namespace tofi
     void Tofi::FilterEntries()
     {
         std::wstring_view realSearch{get_search(m_search.content, m_modes[m_mode]->FirstWordOnly())};
-        if (!realSearch.starts_with(m_previousSearch))
-        {
-            UpdateEntries();
-        }
-
-        if (!realSearch.empty() && m_previousSearch != realSearch)
+        if (!realSearch.empty())
         {
             regex::regex_t regex{regex::build_regex(realSearch)};
             std::transform(std::begin(m_activeResults), std::end(m_activeResults), std::begin(m_activeResults), [&regex](const FuzzyResult &fuzzy) {
@@ -181,8 +178,6 @@ namespace tofi
                                   }),
                                   std::end(m_activeResults));
         }
-
-        m_previousSearch = realSearch;
     }
 
     ftxui::Element Tofi::Render()
