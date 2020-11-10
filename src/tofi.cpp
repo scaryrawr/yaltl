@@ -78,23 +78,13 @@ namespace tofi
 
     bool Tofi::OnEvent(ftxui::Event event)
     {
-        static const ftxui::Event UnixEscape{ftxui::Event::Special("\035")};
-        static const ftxui::Event CtrlV{ftxui::Event::Special("\026")};
-        if (ftxui::Event::Escape == event || UnixEscape == event)
+        if (ftxui::Event::Escape == event)
         {
             if (on_exit)
             {
                 on_exit(0);
                 return true;
             }
-        }
-
-        if (CtrlV == event && !m_results.entries.empty())
-        {
-            m_search.content = m_results.entries[m_results.selected];
-            m_search.cursor_position = m_search.content.length() + 1;
-
-            return true;
         }
 
         if (ftxui::Event::Tab == event)
