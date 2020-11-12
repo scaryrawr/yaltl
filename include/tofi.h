@@ -36,9 +36,6 @@ namespace tofi
         //! Load entries from mode if needed
         void UpdateEntries();
 
-        //! Filter out entries based on search criteria
-        void FilterEntries();
-
     private:
         ftxui::Container m_container;
         ftxui::Input m_search;

@@ -9,7 +9,7 @@ namespace tofi
     {
         m_search.placeholder = L"Search";
         m_search.on_enter = std::bind(&Tofi::Execute, this);
-        m_search.on_change = std::bind(&Tofi::FilterEntries, this);
+        m_search.on_change = std::bind(&Tofi::UpdateEntries, this);
 
         Add(&m_container);
         m_container.Add(&m_search);
@@ -46,14 +46,12 @@ namespace tofi
     {
         m_mode = (m_mode + 1) % m_modes.size();
         UpdateEntries();
-        FilterEntries();
     }
 
     void Tofi::PreviousMode()
     {
         m_mode = (m_mode + m_modes.size() - 1) % m_modes.size();
         UpdateEntries();
-        FilterEntries();
     }
 
     void Tofi::Move(tofi::Move move)
@@ -138,10 +136,7 @@ namespace tofi
         std::transform(std::begin(results), std::end(results), std::begin(m_activeResults), [](std::shared_ptr<Entry> ptr) {
             return FuzzyResult{ptr, std::nullopt};
         });
-    }
 
-    void Tofi::FilterEntries()
-    {
         std::wstring_view realSearch{get_search(m_search.content, m_modes[m_mode]->FirstWordOnly())};
         if (!realSearch.empty())
         {
