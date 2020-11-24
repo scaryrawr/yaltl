@@ -5,4 +5,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Build
-      uses : scaryrawr/tofi/build.yml@docker-build
+      uses : scaryrawr/tofi@docker-build
