@@ -174,12 +174,8 @@ namespace tofi
                                   }),
                                   std::end(m_activeResults));
 
-            std::stable_partition(std::begin(m_activeResults), std::end(m_activeResults), [&search{m_search.content}](const FuzzyResult &fuzzy) {
-                return fuzzy.result->criteria.has_value()
-                           ? std::any_of(std::begin(fuzzy.result->criteria.value()), std::end(fuzzy.result->criteria.value()), [&search](const std::wstring &critter) {
-                                 return mtl::string::ifind(critter, search) == 0;
-                             })
-                           : mtl::string::ifind(fuzzy.result->display, search) == 0;
+            std::stable_sort(std::begin(m_activeResults), std::end(m_activeResults), [&search{m_search.content}](const FuzzyResult &lhs, const FuzzyResult &rhs) {
+                return mtl::string::ifind(lhs.result->display, search) < mtl::string::ifind(rhs.result->display, search);
             });
         }
     }
