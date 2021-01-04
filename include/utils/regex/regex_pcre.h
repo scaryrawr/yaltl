@@ -7,7 +7,8 @@ namespace tofi
 {
     namespace regex
     {
-        using regex_t = mtl::unique_ptr<decltype(pcre2_code_free), &pcre2_code_free>;
+        using unique_regex_t = mtl::unique_ptr<decltype(pcre2_code_free), &pcre2_code_free>;
+        using regex_t = std::shared_ptr<unique_regex_t::element_type>;
     } // namespace regex
 
 } // namespace tofi

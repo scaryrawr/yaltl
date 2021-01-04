@@ -2,7 +2,7 @@
 
 #include <functional>
 #include <limits>
-#include <sstream>
+#include <map>
 #include <string>
 
 namespace tofi
@@ -11,11 +11,19 @@ namespace tofi
     {
         regex_t build_regex(std::wstring_view search)
         {
-            std::wstring pattern{build_pattern(search)};
-            int32_t error{};
-            PCRE2_SIZE errorOffset{};
+            static std::map<std::wstring, regex_t> cache;
+            const std::wstring key{search};
+            auto itr{cache.find(key)};
+            if (itr == std::end(cache))
+            {
+                std::wstring pattern{build_pattern(search)};
+                int32_t error{};
+                PCRE2_SIZE errorOffset{};
 
-            return regex_t{pcre2_compile(reinterpret_cast<PCRE2_SPTR32>(pattern.c_str()), PCRE2_ZERO_TERMINATED, PCRE2_CASELESS, &error, &errorOffset, nullptr)};
+                std::tie(itr, std::ignore) = cache.emplace(key, unique_regex_t{pcre2_compile(reinterpret_cast<PCRE2_SPTR32>(pattern.c_str()), PCRE2_ZERO_TERMINATED, PCRE2_CASELESS, &error, &errorOffset, nullptr)});
+            }
+
+            return itr->second;
         }
 
         /**
