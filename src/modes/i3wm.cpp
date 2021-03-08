@@ -189,24 +189,8 @@ namespace tofi
             return m_active;
         }
 
-        /**
-         * @brief Move to window that may be of interest
-         * 
-         * @param selected The window to check out
-         */
         void i3wm::Preview(const Entry &selected)
         {
-            auto res = reinterpret_cast<const ContainerEntry *>(&selected);
-            auto con{res->container};
-            if (!con->workspace.has_value())
-            {
-                return;
-            }
-
-            // Fancy focus dance so we can have tofi always be on the active monitor but maintain focus
-            m_conn.send_command(commands::switch_to_workspace(con->workspace.value()));
-            m_conn.send_command(commands::move_instance(m_self_id, con->workspace.value()));
-            m_conn.send_command(commands::focus_instance(m_self_id));
         }
 
         /**
