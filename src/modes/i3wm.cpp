@@ -9,7 +9,7 @@
 #define APP_ID "app_id"
 #define INSTANCE_ID "instance"
 
-namespace cofi
+namespace yaltl
 {
     namespace modes
     {
@@ -208,4 +208,4 @@ namespace cofi
         }
     } // namespace modes
 
-} // namespace cofi
+} // namespace yaltl

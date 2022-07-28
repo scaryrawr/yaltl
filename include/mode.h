@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace cofi
+namespace yaltl
 {
     struct Entry
     {
@@ -39,7 +39,7 @@ namespace cofi
     };
 
     /**
-     * @brief Interface of functions a mode must implement to be supported by cofi.
+     * @brief Interface of functions a mode must implement to be supported by yaltl.
      * 
      */
     class Mode
@@ -81,4 +81,4 @@ namespace cofi
     };
 
     using Modes = std::vector<std::unique_ptr<Mode>>;
-} // namespace cofi
+} // namespace yaltl

@@ -3,7 +3,7 @@
 #include "../mode.h"
 #include <future>
 
-namespace cofi
+namespace yaltl
 {
     namespace modes
     {
@@ -32,4 +32,4 @@ namespace cofi
             std::future<Entries> m_loading;
         };
     } //namespace modes
-} // namespace cofi
+} // namespace yaltl

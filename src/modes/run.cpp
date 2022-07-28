@@ -20,7 +20,7 @@ constexpr bool INCLUDE_COMMAND{false};
 constexpr bool INCLUDE_COMMAND{true};
 #endif
 
-namespace cofi
+namespace yaltl
 {
     namespace modes
     {
@@ -143,4 +143,4 @@ namespace cofi
         }
     } // namespace modes
 
-} // namespace cofi
+} // namespace yaltl

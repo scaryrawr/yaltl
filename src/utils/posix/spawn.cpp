@@ -7,7 +7,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-namespace cofi
+namespace yaltl
 {
     bool spawn(Command command)
     {
@@ -54,4 +54,4 @@ namespace cofi
         // Oddly, even if we're "successful" here, we don't actually know what happened to the child we care about
         return WIFEXITED(stat) && 0 == WEXITSTATUS(stat);
     }
-} // namespace cofi
+} // namespace yaltl

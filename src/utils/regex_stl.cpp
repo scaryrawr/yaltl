@@ -4,7 +4,7 @@
 #include <sstream>
 #include <string>
 
-namespace cofi
+namespace yaltl
 {
     namespace regex
     {
@@ -31,4 +31,4 @@ namespace cofi
         }
     } // namespace regex
 
-} // namespace cofi
+} // namespace yaltl

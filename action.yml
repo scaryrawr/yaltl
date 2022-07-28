@@ -1,5 +1,0 @@
-name: 'Fedora Build'
-description: 'Build using cmake on Fedora'
-runs:
-  using: 'docker'
-  image: 'Dockerfile'

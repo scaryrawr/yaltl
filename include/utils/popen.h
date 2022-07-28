@@ -11,7 +11,7 @@
 #include <mtl/memory.hpp>
 #include <mtl/string.hpp>
 
-namespace cofi
+namespace yaltl
 {
     using unique_file = mtl::unique_ptr<decltype(::fclose), &::fclose>;
 
@@ -71,4 +71,4 @@ namespace cofi
 
         return lines;
     }
-} // namespace cofi
+} // namespace yaltl

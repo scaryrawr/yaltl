@@ -7,7 +7,7 @@
 #include <string_view>
 #include <vector>
 
-namespace cofi
+namespace yaltl
 {
     namespace modes
     {
@@ -36,4 +36,4 @@ namespace cofi
             Entries m_results;
         };
     } // namespace modes
-} // namespace cofi
+} // namespace yaltl

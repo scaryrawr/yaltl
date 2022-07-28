@@ -3,9 +3,9 @@
 #include "../mode.h"
 #include "utils/popen.h"
 
-#define TOFI_HAS_DMENU
+#define YALTL_HAS_DMENU
 
-namespace cofi
+namespace yaltl
 {
     namespace modes
     {
@@ -54,4 +54,4 @@ namespace cofi
         };
     } // namespace modes
 
-} // namespace cofi
+} // namespace yaltl

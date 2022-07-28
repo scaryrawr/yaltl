@@ -7,7 +7,7 @@
 #include <sstream>
 #include <vector>
 
-namespace cofi
+namespace yaltl
 {
     namespace modes
     {
@@ -60,4 +60,4 @@ namespace cofi
         }
     } // namespace modes
 
-} // namespace cofi
+} // namespace yaltl

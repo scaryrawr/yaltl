@@ -2,7 +2,7 @@
 
 #include "utils/command.h"
 
-namespace cofi
+namespace yaltl
 {
     /**
      * @brief Spawn a process that will outlive the parent process.
@@ -12,4 +12,4 @@ namespace cofi
      * @return false - Process most likely not started
      */
     bool spawn(Command command);
-} // namespace cofi
+} // namespace yaltl

@@ -7,7 +7,7 @@
 #include <windows.h>
 #include <wil/resource.h>
 
-namespace cofi
+namespace yaltl
 {
     bool spawn(Command command)
     {
@@ -51,4 +51,4 @@ namespace cofi
 
         return true;
     }
-} // namespace cofi
+} // namespace yaltl

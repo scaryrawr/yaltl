@@ -2,11 +2,11 @@
 
 #include <regex>
 
-namespace cofi
+namespace yaltl
 {
     namespace regex
     {
         using regex_t = std::wregex;
     } // namespace regex
 
-} // namespace cofi
+} // namespace yaltl

@@ -1,7 +1,7 @@
 #include "utils/command.h"
 #include <mtl/string.hpp>
 
-namespace cofi
+namespace yaltl
 {
     namespace commands
     {
@@ -23,4 +23,4 @@ namespace cofi
             return retval;
         }
     } // namespace commands
-} // namespace cofi
+} // namespace yaltl

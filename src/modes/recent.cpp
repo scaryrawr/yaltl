@@ -9,7 +9,7 @@
 #include <locale>
 #include <sstream>
 
-namespace cofi
+namespace yaltl
 {
 	namespace modes
 	{
@@ -70,4 +70,4 @@ namespace cofi
 			return spawn(commands::parse(cmd.str())) ? PostExec::CloseSuccess : PostExec::CloseFailure;
 		}
 	} // namespace modes
-} // namespace cofi
+} // namespace yaltl
