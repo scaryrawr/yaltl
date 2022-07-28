@@ -1,16 +1,16 @@
-#include "tofi.h"
+#include "cofi.h"
 #include "mtl/details/istring.hpp"
 
 #include <algorithm>
 #include <ftxui/screen/terminal.hpp>
 
-namespace tofi
+namespace cofi
 {
-    Tofi::Tofi(Modes &&modes) : m_container{ftxui::Container::Vertical()}, m_search{}, m_mode{}, m_modes{std::move(modes)}
+    Cofi::Cofi(Modes &&modes) : m_container{ftxui::Container::Vertical()}, m_search{}, m_mode{}, m_modes{std::move(modes)}
     {
         m_search.placeholder = L"Search";
-        m_search.on_enter = std::bind(&Tofi::Execute, this);
-        m_search.on_change = std::bind(&Tofi::UpdateEntries, this);
+        m_search.on_enter = std::bind(&Cofi::Execute, this);
+        m_search.on_change = std::bind(&Cofi::UpdateEntries, this);
 
         Add(&m_container);
         m_container.Add(&m_search);
@@ -21,7 +21,7 @@ namespace tofi
         UpdateEntries();
     }
 
-    void Tofi::Execute()
+    void Cofi::Execute()
     {
         if (!m_activeResults.empty())
         {
@@ -43,19 +43,19 @@ namespace tofi
         }
     }
 
-    void Tofi::NextMode()
+    void Cofi::NextMode()
     {
         m_mode = (m_mode + 1) % m_modes.size();
         UpdateEntries();
     }
 
-    void Tofi::PreviousMode()
+    void Cofi::PreviousMode()
     {
         m_mode = (m_mode + m_modes.size() - 1) % m_modes.size();
         UpdateEntries();
     }
 
-    void Tofi::Move(tofi::Move move)
+    void Cofi::Move(cofi::Move move)
     {
         switch (move)
         {
@@ -77,7 +77,7 @@ namespace tofi
         }
     }
 
-    bool Tofi::OnEvent(ftxui::Event event)
+    bool Cofi::OnEvent(ftxui::Event event)
     {
         if (ftxui::Event::Escape == event)
         {
@@ -130,7 +130,7 @@ namespace tofi
         return search;
     }
 
-    void Tofi::UpdateEntries()
+    void Cofi::UpdateEntries()
     {
         const Entries &results{m_modes[m_mode]->Results()};
         m_activeResults.resize(results.size());
@@ -180,7 +180,7 @@ namespace tofi
         }
     }
 
-    ftxui::Element Tofi::Render()
+    ftxui::Element Cofi::Render()
     {
         m_results.entries.resize(m_activeResults.size());
         std::transform(std::begin(m_activeResults), std::end(m_activeResults), std::begin(m_results.entries), [](const FuzzyResult &result) {
@@ -208,4 +208,4 @@ namespace tofi
         return ftxui::vbox({ftxui::hbox({ftxui::text(m_modes[m_mode]->Name() + L": "), m_search.Render()}),
                             m_results.Render() | ftxui::yframe | ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, size.dimy - 1)});
     }
-} // namespace tofi
+} // namespace cofi

@@ -1,15 +1,15 @@
-# tofi
+# cofi
 
-tofi is a terminal launcher
+cofi is a terminal launcher
 
-Why tofi? A play on [toffee](https://en.wikipedia.org/wiki/Toffee), and because there's:
+Why cofi? A play on [coffee](https://en.wikipedia.org/wiki/Coffee), and because there's:
 
 - [rofi](https://github.com/davatorium/rofi)
 - [wofi](https://hg.sr.ht/~scoopta/wofi)
 
-And it's based on using the terminal for UI.
+And it's based on using the console for UI.
 
-![tofi demo](./images/tofi.gif)
+![cofi demo](./images/cofi.gif)
 
 ## Dependencies
 
@@ -25,7 +25,7 @@ And it's based on using the terminal for UI.
 ## Building
 
 ```sh
-cd tofi
+cd cofi
 export CC=clang
 export CXX=clang++
 mkdir build && cd build
@@ -45,11 +45,11 @@ sudo make install
 - i3wm - Window switcher for i3wm/sway
 - Script - Run a script
   - Results will be passed back to the script
-  - Continued output to stdout will cause tofi to continue to display the new results
+  - Continued output to stdout will cause cofi to continue to display the new results
 
 ## Keyboard shortcuts
 
-- Esc - Cancel out of tofi
+- Esc - Cancel out of cofi
 - Tab - Next Mode
 - Shift+Tab - Previous Mode
 
@@ -62,23 +62,24 @@ Example uses [alacritty](https://github.com/alacritty/alacritty)
 Set up your menu command:
 
 ```shell
-for_window [app_id="tofi"] floating enable, border pixel 2, sticky enable
-set $menu exec alacritty --class tofi -d 80 10 -e sh -c 'tofi -m drun,run,i3wm'
+for_window [app_id="cofi"] floating enable, border pixel 2, sticky enable
+set $menu exec alacritty --class cofi -d 80 10 -e sh -c 'cofi -m drun,run,i3wm'
 ```
 
 ### [i3](https://i3wm.org/)
 
-i3 appears to have parse errors when trying to launch tofi with args, so we use a launch script.
+i3 appears to have parse errors when trying to launch cofi with args, so we use a launch script.
 
-Create a launch script `~/.config/i3/scripts/launch_tofi`:
+Create a launch script `~/.config/i3/scripts/launch_cofi`:
+
 ```sh
 #!/usr/bin/env sh
-tofi -m drun,run,i3wm
+cofi -m drun,run,i3wm
 ```
 
 Set up your menu command:
 
 ```shell
-for_window [instance="tofi"] floating enable, border pixel 2, sticky enable
-set $menu exec alacritty --class tofi -d 80 10 -e sh -c '~/.config/i3/scripts/launch_tofi'
+for_window [instance="cofi"] floating enable, border pixel 2, sticky enable
+set $menu exec alacritty --class cofi -d 80 10 -e sh -c '~/.config/i3/scripts/launch_cofi'
 ```

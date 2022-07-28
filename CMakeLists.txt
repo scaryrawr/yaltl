@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project("tofi"
+project("cofi"
         VERSION 0.1
         DESCRIPTION "Terminal based launcher"
         LANGUAGES CXX)
@@ -10,7 +10,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 list(APPEND SOURCES
     ./src/main.cpp
-    ./src/tofi.cpp
+    ./src/cofi.cpp
     ./src/modes/dmenu.cpp
     ./src/modes/run.cpp
     ./src/modes/script.cpp
@@ -113,12 +113,12 @@ else()
     list(APPEND SOURCES ./src/utils/regex_stl.cpp)
 endif()
 
-configure_file(TofiConfig.h.cmake TofiConfig.h)
+configure_file(CofiConfig.h.cmake CofiConfig.h)
 
-add_executable(tofi ${SOURCES})
+add_executable(cofi ${SOURCES})
 
-target_link_libraries(tofi PRIVATE ${LIBRARIES})
-target_include_directories(tofi PRIVATE ${INCLUDE_DIRS})
-target_compile_options(tofi PRIVATE ${CFLAGS})
+target_link_libraries(cofi PRIVATE ${LIBRARIES})
+target_include_directories(cofi PRIVATE ${INCLUDE_DIRS})
+target_compile_options(cofi PRIVATE ${CFLAGS})
 
-install(TARGETS tofi)
+install(TARGETS cofi)

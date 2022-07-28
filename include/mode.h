@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace tofi
+namespace cofi
 {
     struct Entry
     {
@@ -39,7 +39,7 @@ namespace tofi
     };
 
     /**
-     * @brief Interface of functions a mode must implement to be supported by tofi.
+     * @brief Interface of functions a mode must implement to be supported by cofi.
      * 
      */
     class Mode
@@ -81,4 +81,4 @@ namespace tofi
     };
 
     using Modes = std::vector<std::unique_ptr<Mode>>;
-} // namespace tofi
+} // namespace cofi

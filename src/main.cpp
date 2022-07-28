@@ -1,6 +1,6 @@
-#include <TofiConfig.h>
+#include <CofiConfig.h>
 
-#include "tofi.h"
+#include "cofi.h"
 #include "modes/dmenu.h"
 #ifdef GIOMM_FOUND
 #include "modes/drun.h"
@@ -35,8 +35,8 @@ struct LaunchOptions
 
 void help()
 {
-	std::cout << "tofi usage:" << std::endl
-			  << "\ttofi [--options]" << std::endl
+	std::cout << "cofi usage:" << std::endl
+			  << "\tcofi [--options]" << std::endl
 			  << "Options:" << std::endl;
 	std::cout << "\t-d, --dmenu\tRun in dmenu mode" << std::endl;
 	std::cout << "\t-m, --modes\tStart with modes enabled [drun,run,i3wm]" << std::endl
@@ -60,7 +60,7 @@ void help()
 			  << "\t\t -m list:ls" << std::endl
 			  << std::endl
 			  << "\tcommand will be called with selected result" << std::endl
-			  << "\ttofi will stay open as long as command prints output" << std::endl;
+			  << "\tcofi will stay open as long as command prints output" << std::endl;
 
 	exit(-1);
 }
@@ -133,44 +133,44 @@ int main(int argc, char **argv)
 {
 	LaunchOptions options{parse_args(argc, argv)};
 
-	tofi::Modes modes;
+	cofi::Modes modes;
 
 	// If we're in dmenu mode, other modes might break, so... just dmenu
 	if (options.dmenu)
 	{
-		modes.emplace_back(std::make_unique<tofi::modes::dmenu>());
+		modes.emplace_back(std::make_unique<cofi::modes::dmenu>());
 	}
 	else
 	{
-		std::transform(std::begin(options.modes), std::end(options.modes), std::back_inserter(modes), [](const LaunchMode &mode) -> std::unique_ptr<tofi::Mode> {
+		std::transform(std::begin(options.modes), std::end(options.modes), std::back_inserter(modes), [](const LaunchMode &mode) -> std::unique_ptr<cofi::Mode> {
 			if (mode.script.has_value())
 			{
-				return std::make_unique<tofi::modes::script>(mode.mode, mode.script.value());
+				return std::make_unique<cofi::modes::script>(mode.mode, mode.script.value());
 			}
 
 #ifdef I3IPC_FOUND
 			if ("i3wm" == mode.mode)
 			{
-				return std::make_unique<tofi::modes::i3wm>("tofi");
+				return std::make_unique<cofi::modes::i3wm>("cofi");
 			}
 #endif
 
 			if ("run" == mode.mode)
 			{
-				return std::make_unique<tofi::modes::run>();
+				return std::make_unique<cofi::modes::run>();
 			}
 
 #ifdef GIOMM_FOUND
 			if ("drun" == mode.mode)
 			{
-				return std::make_unique<tofi::modes::drun>();
+				return std::make_unique<cofi::modes::drun>();
 			}
 #endif
 
 #ifdef GTKMM_FOUND
 			if ("recent" == mode.mode)
 			{
-				return std::make_unique<tofi::modes::recent>();
+				return std::make_unique<cofi::modes::recent>();
 			}
 #endif
 
@@ -188,14 +188,14 @@ int main(int argc, char **argv)
 	// Use active wal theme if available
 	system("[ -f $HOME/.cache/wal/sequences ] && cat $HOME/.cache/wal/sequences");
 
-	tofi::Tofi tofi{std::move(modes)};
+	cofi::Cofi cofi{std::move(modes)};
 	int exit{};
 	auto screen = ftxui::ScreenInteractive::TerminalOutput();
-	tofi.on_exit = [&exit, &screen](int code) {
+	cofi.on_exit = [&exit, &screen](int code) {
 		exit = code;
 		screen.ExitLoopClosure()();
 	};
 
-	screen.Loop(&tofi);
+	screen.Loop(&cofi);
 	return exit;
 }

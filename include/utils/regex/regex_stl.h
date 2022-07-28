@@ -2,11 +2,11 @@
 
 #include <regex>
 
-namespace tofi
+namespace cofi
 {
     namespace regex
     {
         using regex_t = std::wregex;
     } // namespace regex
 
-} // namespace tofi
+} // namespace cofi

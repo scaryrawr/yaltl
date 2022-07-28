@@ -5,7 +5,7 @@
 #include <string_view>
 #include <vector>
 
-namespace tofi
+namespace cofi
 {
     struct Command
     {
@@ -28,9 +28,9 @@ namespace tofi
          * @brief Parses the "command line" into binary path and arguments
          * 
          * @param commandline The command line to parse. i.e: firefox -h
-         * @return tofi::Command 
+         * @return cofi::Command 
          */
-        tofi::Command parse(std::string_view commandline);
+        cofi::Command parse(std::string_view commandline);
     } // namespace commands
 
-} // namespace tofi
+} // namespace cofi

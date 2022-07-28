@@ -2,7 +2,7 @@
 
 #include "utils/command.h"
 
-namespace tofi
+namespace cofi
 {
     /**
      * @brief Spawn a process that will outlive the parent process.
@@ -12,4 +12,4 @@ namespace tofi
      * @return false - Process most likely not started
      */
     bool spawn(Command command);
-} // namespace tofi
+} // namespace cofi

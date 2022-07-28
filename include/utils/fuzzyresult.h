@@ -7,7 +7,7 @@
 #include <string>
 #include <compare>
 
-namespace tofi
+namespace cofi
 {
     struct FuzzyResult
     {
@@ -47,4 +47,4 @@ namespace tofi
             return match.value().length() <=> other.match.value().length();
         }
     };
-} // namespace tofi
+} // namespace cofi

@@ -7,7 +7,7 @@
 #include <string_view>
 #include <vector>
 
-namespace tofi
+namespace cofi
 {
     namespace modes
     {
@@ -36,4 +36,4 @@ namespace tofi
             Entries m_results;
         };
     } // namespace modes
-} // namespace tofi
+} // namespace cofi

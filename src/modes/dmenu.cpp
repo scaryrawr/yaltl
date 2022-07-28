@@ -23,7 +23,7 @@ constexpr auto CONSOLE_OUTPUT = "/dev/tty";
 #include <unistd.h>
 #endif
 
-namespace tofi
+namespace cofi
 {
     namespace modes
     {
@@ -60,8 +60,8 @@ namespace tofi
         dmenu::dmenu() : m_entries(load_stdin()),                       // Load stdin before re-routing I/O
                          m_stdoutCopy{dup(STDOUT_FILENO)},              // Save off stdout, this is what gets piped to the next process
                          m_stdinCopy{dup(STDIN_FILENO)},                // Save off stdin, probably not important...
-                         m_ttyIn{freopen(CONSOLE_INPUT, "r", stdin)},   // Open up the tty for input (otherwise the user can't interact with tofi)
-                         m_ttyOut{freopen(CONSOLE_OUTPUT, "w", stdout)} // Open up the tty for output (otherwise tofi won't render).
+                         m_ttyIn{freopen(CONSOLE_INPUT, "r", stdin)},   // Open up the tty for input (otherwise the user can't interact with cofi)
+                         m_ttyOut{freopen(CONSOLE_OUTPUT, "w", stdout)} // Open up the tty for output (otherwise cofi won't render).
         {
 #ifdef WIN32
             std::ios::sync_with_stdio(true);
@@ -96,4 +96,4 @@ namespace tofi
         }
     } // namespace modes
 
-} // namespace tofi
+} // namespace cofi

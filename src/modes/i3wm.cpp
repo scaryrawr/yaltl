@@ -9,7 +9,7 @@
 #define APP_ID "app_id"
 #define INSTANCE_ID "instance"
 
-namespace tofi
+namespace cofi
 {
     namespace modes
     {
@@ -208,4 +208,4 @@ namespace tofi
         }
     } // namespace modes
 
-} // namespace tofi
+} // namespace cofi

@@ -3,7 +3,7 @@
 #include "../mode.h"
 #include <future>
 
-namespace tofi
+namespace cofi
 {
     namespace modes
     {
@@ -32,4 +32,4 @@ namespace tofi
             std::future<Entries> m_loading;
         };
     } //namespace modes
-} // namespace tofi
+} // namespace cofi

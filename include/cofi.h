@@ -10,7 +10,7 @@
 #include "utils/fuzzyresult.h"
 #include "utils/regex.h"
 
-namespace tofi
+namespace cofi
 {
     enum class Move
     {
@@ -18,15 +18,15 @@ namespace tofi
         Down
     };
 
-    class Tofi : public ftxui::Component
+    class Cofi : public ftxui::Component
     {
     public:
-        Tofi(Modes &&);
+        Cofi(Modes &&);
 
         void Execute();
         void NextMode();
         void PreviousMode();
-        void Move(tofi::Move move);
+        void Move(cofi::Move move);
         bool OnEvent(ftxui::Event) override;
         ftxui::Element Render() override;
 
@@ -44,4 +44,4 @@ namespace tofi
         Modes m_modes;
         std::vector<FuzzyResult> m_activeResults;
     };
-} // namespace tofi
+} // namespace cofi

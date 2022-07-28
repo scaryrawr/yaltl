@@ -1,6 +1,6 @@
 #pragma once
 
-#include <TofiConfig.h>
+#include <CofiConfig.h>
 
 #include <optional>
 #include <string>
@@ -12,7 +12,7 @@
 #include "./regex/regex_pcre.h"
 #endif
 
-namespace tofi
+namespace cofi
 {
     namespace regex
     {
@@ -31,4 +31,4 @@ namespace tofi
         std::optional<std::wstring_view> fuzzy_find(std::wstring_view outer, const regex_t &search);
     } // namespace regex
 
-} // namespace tofi
+} // namespace cofi

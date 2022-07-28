@@ -5,7 +5,7 @@
 
 #define TOFI_HAS_DMENU
 
-namespace tofi
+namespace cofi
 {
     namespace modes
     {
@@ -54,4 +54,4 @@ namespace tofi
         };
     } // namespace modes
 
-} // namespace tofi
+} // namespace cofi

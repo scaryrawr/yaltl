@@ -1,7 +1,7 @@
 #include "utils/command.h"
 #include <mtl/string.hpp>
 
-namespace tofi
+namespace cofi
 {
     namespace commands
     {
@@ -23,4 +23,4 @@ namespace tofi
             return retval;
         }
     } // namespace commands
-} // namespace tofi
+} // namespace cofi

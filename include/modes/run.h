@@ -7,7 +7,7 @@
 #include <vector>
 #include <filesystem>
 
-namespace tofi
+namespace cofi
 {
     namespace modes
     {
@@ -40,4 +40,4 @@ namespace tofi
         };
     } // namespace modes
 
-} // namespace tofi
+} // namespace cofi
