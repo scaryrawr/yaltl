@@ -1,16 +1,16 @@
-#include "tofi.h"
+#include "yaltl.h"
 #include "mtl/details/istring.hpp"
 
 #include <algorithm>
 #include <ftxui/screen/terminal.hpp>
 
-namespace tofi
+namespace yaltl
 {
-    Tofi::Tofi(Modes &&modes) : m_container{ftxui::Container::Vertical()}, m_search{}, m_mode{}, m_modes{std::move(modes)}
+    Yaltl::Yaltl(Modes &&modes) : m_container{ftxui::Container::Vertical()}, m_search{}, m_mode{}, m_modes{std::move(modes)}
     {
         m_search.placeholder = L"Search";
-        m_search.on_enter = std::bind(&Tofi::Execute, this);
-        m_search.on_change = std::bind(&Tofi::UpdateEntries, this);
+        m_search.on_enter = std::bind(&Yaltl::Execute, this);
+        m_search.on_change = std::bind(&Yaltl::UpdateEntries, this);
 
         Add(&m_container);
         m_container.Add(&m_search);
@@ -21,7 +21,7 @@ namespace tofi
         UpdateEntries();
     }
 
-    void Tofi::Execute()
+    void Yaltl::Execute()
     {
         if (!m_activeResults.empty())
         {
@@ -43,19 +43,19 @@ namespace tofi
         }
     }
 
-    void Tofi::NextMode()
+    void Yaltl::NextMode()
     {
         m_mode = (m_mode + 1) % m_modes.size();
         UpdateEntries();
     }
 
-    void Tofi::PreviousMode()
+    void Yaltl::PreviousMode()
     {
         m_mode = (m_mode + m_modes.size() - 1) % m_modes.size();
         UpdateEntries();
     }
 
-    void Tofi::Move(tofi::Move move)
+    void Yaltl::Move(yaltl::Move move)
     {
         switch (move)
         {
@@ -77,7 +77,7 @@ namespace tofi
         }
     }
 
-    bool Tofi::OnEvent(ftxui::Event event)
+    bool Yaltl::OnEvent(ftxui::Event event)
     {
         if (ftxui::Event::Escape == event)
         {
@@ -130,19 +130,19 @@ namespace tofi
         return search;
     }
 
-    void Tofi::UpdateEntries()
+    void Yaltl::UpdateEntries()
     {
         const Entries &results{m_modes[m_mode]->Results()};
         m_activeResults.resize(results.size());
-        std::transform(std::begin(results), std::end(results), std::begin(m_activeResults), [](std::shared_ptr<Entry> ptr) {
-            return FuzzyResult{ptr, std::nullopt};
-        });
+        std::transform(std::begin(results), std::end(results), std::begin(m_activeResults), [](std::shared_ptr<Entry> ptr)
+                       { return FuzzyResult{ptr, std::nullopt}; });
 
         std::wstring_view realSearch{get_search(m_search.content, m_modes[m_mode]->FirstWordOnly())};
         if (!realSearch.empty())
         {
             regex::regex_t regex{regex::build_regex(realSearch)};
-            std::transform(std::begin(m_activeResults), std::end(m_activeResults), std::begin(m_activeResults), [&regex](const FuzzyResult &fuzzy) {
+            std::transform(std::begin(m_activeResults), std::end(m_activeResults), std::begin(m_activeResults), [&regex](const FuzzyResult &fuzzy)
+                           {
                 auto &criteria = fuzzy.result->criteria;
                 std::optional<std::wstring_view> fuzzFactor;
                 if (criteria.has_value())
@@ -164,28 +164,24 @@ namespace tofi
                     fuzzFactor = regex::fuzzy_find(fuzzy.result->display, regex);
                 }
 
-                return FuzzyResult{fuzzy.result, fuzzFactor};
-            });
+                return FuzzyResult{fuzzy.result, fuzzFactor}; });
 
             std::sort(std::begin(m_activeResults), std::end(m_activeResults));
 
-            m_activeResults.erase(std::remove_if(std::begin(m_activeResults), std::end(m_activeResults), [](const FuzzyResult &fuzzy) {
-                                      return !fuzzy.match.has_value();
-                                  }),
+            m_activeResults.erase(std::remove_if(std::begin(m_activeResults), std::end(m_activeResults), [](const FuzzyResult &fuzzy)
+                                                 { return !fuzzy.match.has_value(); }),
                                   std::end(m_activeResults));
 
-            std::stable_partition(std::begin(m_activeResults), std::end(m_activeResults), [&search{m_search.content}](const FuzzyResult &fuzzy) {
-                return mtl::string::ifind(fuzzy.result->display, search) != std::wstring::npos;
-            });
+            std::stable_partition(std::begin(m_activeResults), std::end(m_activeResults), [&search{m_search.content}](const FuzzyResult &fuzzy)
+                                  { return mtl::string::ifind(fuzzy.result->display, search) != std::wstring::npos; });
         }
     }
 
-    ftxui::Element Tofi::Render()
+    ftxui::Element Yaltl::Render()
     {
         m_results.entries.resize(m_activeResults.size());
-        std::transform(std::begin(m_activeResults), std::end(m_activeResults), std::begin(m_results.entries), [](const FuzzyResult &result) {
-            return result.result->display;
-        });
+        std::transform(std::begin(m_activeResults), std::end(m_activeResults), std::begin(m_results.entries), [](const FuzzyResult &result)
+                       { return result.result->display; });
 
         if (m_results.selected >= m_results.entries.size())
         {
@@ -208,4 +204,4 @@ namespace tofi
         return ftxui::vbox({ftxui::hbox({ftxui::text(m_modes[m_mode]->Name() + L": "), m_search.Render()}),
                             m_results.Render() | ftxui::yframe | ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, size.dimy - 1)});
     }
-} // namespace tofi
+} // namespace yaltl

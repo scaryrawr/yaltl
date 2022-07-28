@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdio.h>
+#include <algorithm>
 #include <codecvt>
 #include <locale>
 #include <sstream>
@@ -10,7 +11,7 @@
 #include <mtl/memory.hpp>
 #include <mtl/string.hpp>
 
-namespace tofi
+namespace yaltl
 {
     using unique_file = mtl::unique_ptr<decltype(::fclose), &::fclose>;
 
@@ -22,7 +23,7 @@ namespace tofi
 
     /**
      * @brief Reads all output from a command
-     * 
+     *
      * @tparam CharT wide or regular char to return results as
      * @param command The command to run with popen
      * @return std::vector<std::basic_string<CharT>> Collection of lines that were outputted by the command
@@ -63,12 +64,11 @@ namespace tofi
                 mtl::string::split<CharT, std::basic_string<CharT>>(converter.from_bytes(contents.str()), delim, std::back_inserter(lines));
             }
 
-            lines.erase(std::remove_if(std::begin(lines), std::end(lines), [](const std::basic_string<CharT> &line) {
-                            return line.empty();
-                        }),
+            lines.erase(std::remove_if(std::begin(lines), std::end(lines), [](const std::basic_string<CharT> &line)
+                                       { return line.empty(); }),
                         std::end(lines));
         }
 
         return lines;
     }
-} // namespace tofi
+} // namespace yaltl

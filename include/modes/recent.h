@@ -4,7 +4,7 @@
 
 #include <future>
 
-namespace tofi
+namespace yaltl
 {
 	namespace modes
 	{
@@ -27,4 +27,4 @@ namespace tofi
 			std::future<Entries> m_loading;
 		};
 	} // namespace modes
-} // namespace tofi
+} // namespace yaltl

@@ -5,7 +5,7 @@
 #include <sstream>
 #include <string>
 
-namespace tofi
+namespace yaltl
 {
     namespace regex
     {
@@ -53,4 +53,4 @@ namespace tofi
         }
     } // namespace regex
 
-} // namespace tofi
+} // namespace yaltl

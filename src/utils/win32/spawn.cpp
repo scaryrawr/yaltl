@@ -7,7 +7,7 @@
 #include <windows.h>
 #include <wil/resource.h>
 
-namespace tofi
+namespace yaltl
 {
     bool spawn(Command command)
     {
@@ -51,4 +51,4 @@ namespace tofi
 
         return true;
     }
-} // namespace tofi
+} // namespace yaltl

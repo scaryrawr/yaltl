@@ -10,7 +10,7 @@
 #include <codecvt>
 #include <locale>
 
-namespace tofi
+namespace yaltl
 {
     using AppInfo = Glib::RefPtr<Gio::AppInfo>;
 
@@ -102,4 +102,4 @@ namespace tofi
         }
     } // namespace modes
 
-} // namespace tofi
+} // namespace yaltl

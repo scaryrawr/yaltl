@@ -10,7 +10,7 @@
 constexpr auto REGEX_DELIM = L".*";
 constexpr auto SPECIAL_CHARS = L".()[\\+$^*|?";
 
-namespace tofi
+namespace yaltl
 {
     namespace regex
     {
@@ -32,4 +32,4 @@ namespace tofi
         }
     } // namespace regex
 
-} // namespace tofi
+} // namespace yaltl

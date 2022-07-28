@@ -2,11 +2,12 @@
 
 #include "utils/command.h"
 
+#include <algorithm>
 #include <vector>
 #include <sys/wait.h>
 #include <unistd.h>
 
-namespace tofi
+namespace yaltl
 {
     bool spawn(Command command)
     {
@@ -31,9 +32,8 @@ namespace tofi
             if (0 == pid)
             {
                 std::vector<char *> argv{command.argv.size() + 1, nullptr};
-                std::transform(std::begin(command.argv), std::end(command.argv), std::begin(argv), [](std::string &str) {
-                    return str.data();
-                });
+                std::transform(std::begin(command.argv), std::end(command.argv), std::begin(argv), [](std::string &str)
+                               { return str.data(); });
 
                 // command should be the first argument in argv, otherwise certain apps won't run correctly
                 execvp(argv[0], argv.data());
@@ -54,4 +54,4 @@ namespace tofi
         // Oddly, even if we're "successful" here, we don't actually know what happened to the child we care about
         return WIFEXITED(stat) && 0 == WEXITSTATUS(stat);
     }
-} // namespace tofi
+} // namespace yaltl

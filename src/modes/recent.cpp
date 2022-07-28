@@ -9,7 +9,7 @@
 #include <locale>
 #include <sstream>
 
-namespace tofi
+namespace yaltl
 {
 	namespace modes
 	{
@@ -70,4 +70,4 @@ namespace tofi
 			return spawn(commands::parse(cmd.str())) ? PostExec::CloseSuccess : PostExec::CloseFailure;
 		}
 	} // namespace modes
-} // namespace tofi
+} // namespace yaltl
